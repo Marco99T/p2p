@@ -10,8 +10,10 @@ public class P2PChatGUI extends JFrame {
     private JTextField messageField;
     private JButton sendButton;
     private Set<InetAddress> peers = new HashSet<>();
+    private int puerto;
 
-    public P2PChatGUI() {
+    public P2PChatGUI(int puerto) {
+        this.puerto = puerto;
         setTitle("P2P Chat");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
@@ -57,9 +59,10 @@ public class P2PChatGUI extends JFrame {
 
     private void sendToPeers(String message) {
         for (InetAddress peer : peers) {
-            try (Socket socket = new Socket(peer, 12345);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                out.println(message);
+            try (DatagramSocket socket = new DatagramSocket()) {
+                byte[] sendData = message.getBytes();
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, peer, 12600);
+                socket.send(sendPacket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -69,10 +72,10 @@ public class P2PChatGUI extends JFrame {
     private void discoverPeers() {
         new Thread(() -> {
             try {
-                DatagramSocket socket = new DatagramSocket(12347);
+                DatagramSocket socket = new DatagramSocket(puerto);
                 socket.setBroadcast(true);
                 byte[] sendData = "P2PChatDiscovery".getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), 12347);
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), puerto);
                 socket.send(sendPacket);
                 
                 byte[] receiveData = new byte[1024];
@@ -94,6 +97,6 @@ public class P2PChatGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(P2PChatGUI::new);
+        SwingUtilities.invokeLater(() -> new P2PChatGUI(new Scanner(System.in).nextInt()));
     }
 }
