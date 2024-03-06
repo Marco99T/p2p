@@ -70,17 +70,23 @@ public class P2PChatGUI extends JFrame {
         new Thread(() -> {
             try {
                 DatagramSocket socket = new DatagramSocket(12347);
-                byte[] buffer = new byte[1024];
+                socket.setBroadcast(true);
+                byte[] sendData = "P2PChatDiscovery".getBytes();
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), 12347);
+                socket.send(sendPacket);
+                
+                byte[] receiveData = new byte[1024];
                 while (true) {
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(packet);
-                    InetAddress senderAddress = packet.getAddress();
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                    socket.receive(receivePacket);
+                    InetAddress senderAddress = receivePacket.getAddress();
                     if (!senderAddress.equals(socket.getLocalAddress())) {
                         peers.add(senderAddress);
                         chatArea.append("Peer discovered: " + senderAddress.getHostAddress() + "\n");
                         System.out.println("Peer discovered: " + senderAddress.getHostAddress());
                     }
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
