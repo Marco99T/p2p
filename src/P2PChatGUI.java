@@ -10,10 +10,8 @@ public class P2PChatGUI extends JFrame {
     private JTextField messageField;
     private JButton sendButton;
     private Set<InetAddress> peers = new HashSet<>();
-    private int puerto;
 
-    public P2PChatGUI(int puerto) {
-        this.puerto = puerto;
+    public P2PChatGUI() {
         setTitle("P2P Chat");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
@@ -43,7 +41,7 @@ public class P2PChatGUI extends JFrame {
             }
         });
 
-        discoverPeers(puerto);
+        discoverPeers();
 
         setVisible(true);
     }
@@ -59,9 +57,8 @@ public class P2PChatGUI extends JFrame {
 
     private void sendToPeers(String message) {
         for (InetAddress peer : peers) {
-            System.out.println(peer.getHostAddress());
-            try (Socket socket = new Socket(peer, ++puerto);
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+            try (Socket socket = new Socket(peer, 12345);
+                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
                 out.println(message);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -69,19 +66,19 @@ public class P2PChatGUI extends JFrame {
         }
     }
 
-    private void discoverPeers(int puerto) {
+    private void discoverPeers() {
         new Thread(() -> {
             try {
-                DatagramSocket socket = new DatagramSocket(puerto);
+                DatagramSocket socket = new DatagramSocket(12347);
                 byte[] buffer = new byte[1024];
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
                     InetAddress senderAddress = packet.getAddress();
                     if (!senderAddress.equals(socket.getLocalAddress())) {
-                        System.out.println(socket.getReuseAddress());
                         peers.add(senderAddress);
                         chatArea.append("Peer discovered: " + senderAddress.getHostAddress() + "\n");
+                        System.out.println("Peer discovered: " + senderAddress.getHostAddress());
                     }
                 }
             } catch (IOException e) {
@@ -91,10 +88,6 @@ public class P2PChatGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        int puerto = scan.nextInt();
-        P2PChatGUI p2p = new P2PChatGUI(puerto);
-
-        //SwingUtilities.invokeLater(P2PChatGUI::new);
+        SwingUtilities.invokeLater(P2PChatGUI::new);
     }
 }
