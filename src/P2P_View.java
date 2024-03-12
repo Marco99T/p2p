@@ -213,8 +213,9 @@ public class P2P_View extends JFrame {
 	private void start_objects(String host, int port) {
 		peer = new PeerMC(host, port, text_area_chat);	
 		new Thread(peer).start();
-		manager = new Manager_Files(host, port, text_area_chat_files);
-		new Thread(manager).start();
+		manager = new Manager_Files(host, port+1000, text_area_chat_files);
+		manager.start();
+		//new Thread(manager).start();
 	}
 	
 
