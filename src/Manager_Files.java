@@ -35,9 +35,6 @@ public class Manager_Files implements Runnable{
 		//Ruta del archivo
 		File file = new File(path);
 		
-		// Tamaño del buffer para leer el archivo
-        int buffer_size = 1024;
-        byte[] buffer = new byte[buffer_size];
 
         // Abrir flujo de entrada para leer el archivo
         FileInputStream file_input = null;
@@ -48,6 +45,10 @@ public class Manager_Files implements Runnable{
 			e.printStackTrace();
 			return false;
 		}
+		
+		// Tamaño del buffer para leer el archivo
+        int buffer_size = 1024;
+        byte[] buffer = new byte[buffer_size];
 
         int bytes_read;
         long file_size = file.length();
@@ -117,7 +118,7 @@ public class Manager_Files implements Runnable{
         File file = null;
 		try {
 			String ruta = "C:/";
-			String 	directory = "P2P";
+			String 	directory = "P2P/";
 			File directory_ = new File(ruta, directory);
 			
 			// Verificar si la carpeta existe
@@ -133,7 +134,7 @@ public class Manager_Files implements Runnable{
 	            }
 	        }
 			
-			file_output = new FileOutputStream(ruta + directory + "/testing.jpg");
+			file_output = new FileOutputStream(ruta + directory + "testing.jpg");
 		} catch (FileNotFoundException e) {
 		}
 

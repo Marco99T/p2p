@@ -27,6 +27,7 @@ public class P2P_View extends JFrame {
     private JTextArea text_area_chat;
     private JTextArea text_area_eleccion;
     private JTextField text_nickname;
+    private JTextArea text_area_chat_files;
     
     
     private PeerMC peer;
@@ -160,9 +161,13 @@ public class P2P_View extends JFrame {
 		btn_send_file.setBounds(120, 550, 120, 30);
 		panel_EOD.add(btn_send_file);
 		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(0, 0, 240, 520);
-		panel_EOD.add(scrollPane_1);
+		text_area_chat_files = new JTextArea();
+		text_area_chat_files.setEditable(false);
+		
+		JScrollPane scroll_chat_files = new JScrollPane(text_area_chat_files);
+		scroll_chat_files.setBounds(0, 0, 240, 520);
+		panel_EOD.add(scroll_chat_files);
+		
 		
 		JLabel lblNewLabel = new JLabel("Algoritmos de eleccion");
 		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 14));
@@ -208,6 +213,7 @@ public class P2P_View extends JFrame {
 	private void start_objects(String host, int port) {
 		peer = new PeerMC(host, port, text_area_chat);	
 		new Thread(peer).start();
+		manager = new Manager_Files(host, port, text_area_chat_files);
 		new Thread(manager).start();
 	}
 	
