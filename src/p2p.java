@@ -26,6 +26,10 @@ public class p2p extends JFrame {
     private JButton sendButton;
     private Set<InetAddress> peers = new HashSet<>();
     private int puerto;
+    /**
+     * @wbp.nonvisual location=133,-6
+     */
+    private final JPanel panel = new JPanel();
 
 	/**
 	 * Launch the application.
@@ -50,20 +54,23 @@ public class p2p extends JFrame {
 		this.puerto = 10546;
         setTitle("P2P Chat");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
-        setLayout(new BorderLayout());
+        setSize(655, 558);
+        
+        getContentPane().setLayout(null);
 
         chatArea = new JTextArea();
         chatArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(chatArea);
-        add(scrollPane, BorderLayout.CENTER);
+        scrollPane.setBounds(80, 49, 561, 451);
+        getContentPane().add(scrollPane);
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBounds(0, 500, 641, 21);
         messageField = new JTextField();
         sendButton = new JButton("Send");
         bottomPanel.add(messageField, BorderLayout.CENTER);
         bottomPanel.add(sendButton, BorderLayout.EAST);
-        add(bottomPanel, BorderLayout.SOUTH);
+        getContentPane().add(bottomPanel);
 
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -123,5 +130,4 @@ public class p2p extends JFrame {
             }
         }).start();
     }
-
 }
