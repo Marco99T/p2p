@@ -33,6 +33,7 @@ public class P2P_View extends JFrame {
     private PeerMC peer;
     private Person person;
     private Manager_Files manager;
+    private Bully bully;
     private Anillo anillo;
     
 
@@ -82,13 +83,17 @@ public class P2P_View extends JFrame {
 		
 		
 		JButton btn_bully = new JButton("Bully");
+		btn_bully.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		btn_bully.setBounds(0, 0, 240, 30);
 		panel_algoritmo_1.add(btn_bully);
 		
 		JButton btn_anillo = new JButton("Anillo");
 		btn_anillo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				//anillo.send();
 			}
 		});
 		btn_anillo.setBounds(0, 30, 240, 30);
@@ -175,29 +180,29 @@ public class P2P_View extends JFrame {
 		panel_EOD.add(scroll_chat_files);
 		
 		
-		JLabel lblNewLabel = new JLabel("Algoritmos de eleccion");
-		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setBounds(10, 10, 240, 45);
-		contentPane.add(lblNewLabel);
+		JLabel lbl_algoritmos_1 = new JLabel("Algoritmos de eleccion");
+		lbl_algoritmos_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_algoritmos_1.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_algoritmos_1.setBounds(10, 10, 240, 45);
+		contentPane.add(lbl_algoritmos_1);
 		
-		JLabel lblNewLabel_1 = new JLabel("Algortimos de consorcio");
-		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblNewLabel_1.setBounds(320, 10, 240, 45);
-		contentPane.add(lblNewLabel_1);
+		JLabel lbl_algoritmos_2 = new JLabel("Algortimos de consorcio");
+		lbl_algoritmos_2.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_algoritmos_2.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_algoritmos_2.setBounds(320, 10, 240, 45);
+		contentPane.add(lbl_algoritmos_2);
 		
-		JLabel lblNewLabel_2 = new JLabel("Chat");
-		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblNewLabel_2.setBounds(630, 10, 280, 45);
-		contentPane.add(lblNewLabel_2);
+		JLabel lbl_chat = new JLabel("Chat");
+		lbl_chat.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_chat.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_chat.setBounds(630, 10, 280, 45);
+		contentPane.add(lbl_chat);
 		
-		JLabel lblNewLabel_3 = new JLabel("Espacio de objetos distribuido");
-		lblNewLabel_3.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_3.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblNewLabel_3.setBounds(980, 10, 240, 45);
-		contentPane.add(lblNewLabel_3);
+		JLabel lbl_chat_EOD = new JLabel("Espacio de objetos distribuido");
+		lbl_chat_EOD.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_chat_EOD.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_chat_EOD.setBounds(980, 10, 240, 45);
+		contentPane.add(lbl_chat_EOD);
 		
 		JLabel lbl_nickname = new JLabel("NICKNAME");
 		lbl_nickname.setFont(new Font("Arial", Font.BOLD, 12));
@@ -219,11 +224,13 @@ public class P2P_View extends JFrame {
 	private void start_objects(String host, int port) {
 		peer = new PeerMC(host, port, text_area_chat);	
 		new Thread(peer).start();
-		manager = new Manager_Files(host, port+1000, text_area_chat_files);
+		manager = new Manager_Files(host, port + 500, text_area_chat_files);
 		manager.start();
 		//new Thread(manager).start();
-		anillo = new Anillo(host, port, text_area_chat_algoritmos_1);
-		anillo.start();
+		//anillo = new Anillo(host, port + 1000, text_area_chat_algoritmos_1);
+		//new Thread (anillo).start();
+		bully = new Bully(host, port + 1500, text_area_chat_algoritmos_1);
+		new Thread(bully).start();
 	}
 	
 

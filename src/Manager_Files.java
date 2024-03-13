@@ -214,7 +214,7 @@ public class Manager_Files 	extends Thread{
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
             // Crear el archivo de salida
-            FileOutputStream fileOutputStream = new FileOutputStream(ruta + directory + "archivo_recibido.jpg");
+            FileOutputStream fileOutputStream = new FileOutputStream(ruta + directory + "archivo_reci.png");
 
             // Recibir y escribir los datos hasta que se reciba el archivo completo
             while (true) {
