@@ -25,7 +25,7 @@ public class P2P_View extends JFrame {
 	private JPanel contentPane;
     private JTextField text_send_message;
     private JTextArea text_area_chat;
-    private JTextArea text_area_eleccion;
+    private JTextArea text_area_chat_algoritmos_1;
     private JTextField text_nickname;
     private JTextArea text_area_chat_files;
     
@@ -33,6 +33,7 @@ public class P2P_View extends JFrame {
     private PeerMC peer;
     private Person person;
     private Manager_Files manager;
+    private Anillo anillo;
     
 
 	/**
@@ -65,28 +66,33 @@ public class P2P_View extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JPanel panel_eleccion = new JPanel();
-		panel_eleccion.setBackground(Color.LIGHT_GRAY);
-		panel_eleccion.setBounds(10, 74, 240, 580);
-		contentPane.add(panel_eleccion);
-		panel_eleccion.setLayout(null);
+		JPanel panel_algoritmo_1 = new JPanel();
+		panel_algoritmo_1.setBackground(Color.LIGHT_GRAY);
+		panel_algoritmo_1.setBounds(10, 74, 240, 580);
+		contentPane.add(panel_algoritmo_1);
+		panel_algoritmo_1.setLayout(null);
 		
-		text_area_eleccion = new JTextArea();
-		text_area_eleccion.setEditable(false);
-		text_area_eleccion.setFont(new Font("Monospaced", Font.ITALIC, 12));
+		text_area_chat_algoritmos_1 = new JTextArea();
+		text_area_chat_algoritmos_1.setEditable(false);
+		text_area_chat_algoritmos_1.setFont(new Font("Monospaced", Font.ITALIC, 12));
 		
-		JScrollPane scrollPane = new JScrollPane( text_area_eleccion);
-		scrollPane.setBounds(0, 50, 240, 450);
-		panel_eleccion.add(scrollPane);
+		JScrollPane scroll_chat_algoritmos_1 = new JScrollPane( text_area_chat_algoritmos_1);
+		scroll_chat_algoritmos_1.setBounds(0, 60, 240, 520);
+		panel_algoritmo_1.add(scroll_chat_algoritmos_1);
 		
 		
 		JButton btn_bully = new JButton("Bully");
-		btn_bully.setBounds(0, 0, 240, 21);
-		panel_eleccion.add(btn_bully);
+		btn_bully.setBounds(0, 0, 240, 30);
+		panel_algoritmo_1.add(btn_bully);
 		
 		JButton btn_anillo = new JButton("Anillo");
-		btn_anillo.setBounds(0, 25, 240, 21);
-		panel_eleccion.add(btn_anillo);
+		btn_anillo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		btn_anillo.setBounds(0, 30, 240, 30);
+		panel_algoritmo_1.add(btn_anillo);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBackground(Color.LIGHT_GRAY);
@@ -216,6 +222,8 @@ public class P2P_View extends JFrame {
 		manager = new Manager_Files(host, port+1000, text_area_chat_files);
 		manager.start();
 		//new Thread(manager).start();
+		anillo = new Anillo(host, port, text_area_chat_algoritmos_1);
+		anillo.start();
 	}
 	
 

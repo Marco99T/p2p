@@ -188,6 +188,8 @@ public class Manager_Files 	extends Thread{
 		}
         */
 		
+		//FALTA SOLUCIONAR PROBLEMA PARA RECIBIR VARIOS ARCHIVOS
+		
 		try {
 			MulticastSocket socket_serve = new MulticastSocket(this.port);
             socket_serve.joinGroup(host);
