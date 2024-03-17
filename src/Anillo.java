@@ -1,12 +1,10 @@
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.JTextArea;
 
@@ -14,9 +12,12 @@ public class Anillo implements Runnable{
 	
 	private MulticastSocket socket;
 	private InetAddress group;
+	private boolean coordinador=false;
+    private boolean elector_lock=false;
 	private int port;
-	private  int ID;
+	private int ID;
 	private int votos;
+	private String IP;
 	
 	private JTextArea text_area_chat_algortimos_1;
 	
@@ -27,7 +28,8 @@ public class Anillo implements Runnable{
 			this.group = InetAddress.getByName(host);
 			this.socket.joinGroup(group);
 			this.text_area_chat_algortimos_1 = text_are_chat_algoritmo_1;
-			this.ID = Integer.parseInt(InetAddress.getLocalHost().getHostAddress().substring(8).replace(".", ""));
+			this.ID = Integer.parseInt(InetAddress.getLocalHost().getHostAddress().substring(5).replace(".", ""));
+			this.IP = String.valueOf(InetAddress.getLocalHost().getHostAddress());
 			this.votos = 0;
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -36,86 +38,103 @@ public class Anillo implements Runnable{
 	}
 	
     
-	public void send() {
+	public void send_message() {
 
-		try {
-			InetAddress localHost = InetAddress.getLocalHost();
-	        int id = Integer.parseInt(localHost.getHostAddress().substring(8).replace(".", ""));
-	        
-	        System.out.println("Mi dirección IP es: " + id);
-	        
-	     // Enviar solicitud de votos a todos los nodos en el grupo
-	        String request = "VOTO: " + id;
-	        DatagramPacket requestPacket = new DatagramPacket(request.getBytes(), request.getBytes().length, group, port);
-	        socket.send(requestPacket);
-		} catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
+		if(!elector_lock && !coordinador){
+        	message_to_select();
+        	String  message = "Se envia mensaje de eleccion con id:" + this.ID + " \n";
+            text_area_chat_algortimos_1.append(message);
+        }
 	}
 
 	public void run() {
-		Set<String> connectedNodes = new HashSet<>();
-		
+		DatagramPacket pack_ = new DatagramPacket(new byte[1024], 1024);
 		try {
-
-            // Recibir respuestas de otros nodos
-            byte[] responseData = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length);
-            socket.receive(responsePacket);
-            String response = new String(responsePacket.getData(), 0, responsePacket.getLength());
-
-            // Analizar respuestas y elegir al líder
-            int leaderID = chooseLeader(response);
-
-            // Si este nodo es el líder, realizar acciones de líder
-            if (leaderID == ID) {
-                performLeaderActions();
-            }
-
-            // Salir del grupo multicast
-            socket.leaveGroup(group);
-            socket.close();
-        } catch (Exception e) {
-            System.err.println("No se pudo determinar la dirección IP: " + e.getMessage());
-        }
-
+			this.socket.receive(pack_);
+			String address = String.valueOf(pack_.getAddress().getHostAddress());
+			
+			if(address.equals(this.IP)){
+				//Validamos que es los que se esta recibiendo
+				ArrayList <String> data = get_data_from_datagrampacket(pack_.getData());
+				String message_cadidate = data.get(0);
+				int id_candidate = Integer.parseInt(data.get(1));
+				
+				System.out.println(message_cadidate);
+				
+				switch(message_cadidate) {
+					case "Coordinador":
+						this.elector_lock = false;
+	                    //System.out.println("El coordinador actual es: "+id_rec+" soy: "+id);
+	                    String message = "";
+	                    message = "El coordinador actual es: " + 5 + "\n Soy: " + this.ID + "\n";
+	                    text_area_chat_algortimos_1.append(message);
+						break;
+					case "Eleccion":
+						if(this.votos >3){
+	                        this.coordinador = true;
+	                        String status = "";
+	                        status = "Votos: " + this.votos + " en :" + this.ID + " \n Coordinador: " + this.coordinador + "\n";
+	                        text_area_chat_algortimos_1.append(status);
+	                    }
+	                    if(this.ID > id_candidate){
+	                        elector_lock=true;
+	                        text_area_chat_algortimos_1.append("Soy candidato(" + this.ID +") \n");
+	                    }
+	                    else{
+	                        votos++;
+	                        System.out.println(id_candidate);
+	                    }
+						break;
+					case "a":
+						break;
+					default:
+						break;
+				}
+			}
+			else {
+				System.out.println("Esto reciviendo datos en mi misma pc");
+			}
+		}catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
     }
 
 
-	// Generar un identificador único para este nodo (para simplificar, se utiliza un valor aleatorio)
-	private int generateUniqueID() {
-	    return (int) (Math.random() * 1000);
+	private void message_to_select(){
+        String message = "Eleccion " + this.ID;
+        DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, port);
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
 	}
 	
-	// Analizar las respuestas de los nodos y elegir al líder basado en el identificador más alto
-	private int chooseLeader(String response) {
-	    // Aquí deberías analizar las respuestas de los nodos y determinar cuál tiene el identificador más alto
-	    // Por simplicidad, supongamos que la respuesta contiene solo el ID del nodo líder
-		String status = "";
-        Integer id_nodo = Integer.valueOf(response.replace("\\D", ""));
-        if (this.ID > id_nodo)	{
-        	this.votos ++;
-        	text_area_chat_algortimos_1.append("Soy candidato(" + this.ID + ") \n");
-        	status = "true";
+	private ArrayList<String> get_data_from_datagrampacket(byte []cad){
+        ArrayList<String> lista= new ArrayList<String>();
+        String message = "";
+        String id_nodo  ="";
+        String cadena=new String(cad);
+        for(char c:cadena.toCharArray()){
+            if(Character.isAlphabetic(c)){
+                message += c;
+            }
+            if(Character.isDigit(c)){
+                id_nodo += c;
+            }
         }
-        else if (this.ID < id_nodo){
-        	status = "false";
-        	DatagramPacket requestPacket = new DatagramPacket(status.getBytes(), status.getBytes().length, group, port);
-	        try {
-				socket.send(requestPacket);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-        
-        
-	    return 5;
-	}
+        lista.add(message);
+        lista.add(id_nodo);
+        return lista;
+    }
 	
-	// Acciones a realizar si este nodo es el líder
-	private void performLeaderActions() {
-	    System.out.println("¡Este nodo es el líder y realizará acciones de líder!");
-	    // Aquí puedes agregar las acciones que debe realizar el líder
-	}
+	private void message_from_coordinator(){
+        byte buffer []= ("Coordinador (" + this.ID + ")").getBytes();
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
+        try {
+            socket.send(packet);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

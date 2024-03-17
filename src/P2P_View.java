@@ -85,6 +85,7 @@ public class P2P_View extends JFrame {
 		JButton btn_bully = new JButton("Bully");
 		btn_bully.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				bully.send_message();
 			}
 		});
 		btn_bully.setBounds(0, 0, 240, 30);
@@ -93,7 +94,7 @@ public class P2P_View extends JFrame {
 		JButton btn_anillo = new JButton("Anillo");
 		btn_anillo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//anillo.send();
+				//anillo.send_message();
 			}
 		});
 		btn_anillo.setBounds(0, 30, 240, 30);
@@ -152,10 +153,9 @@ public class P2P_View extends JFrame {
                 int returnValue = fileChooser.showOpenDialog(null);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
-                    
-                    
-                    boolean status = manager.send_file(selectedFile.getAbsolutePath(), fileChooser.getName());
-                    if(status) {
+                    boolean file_validated = validate_file(selectedFile.getName());
+                    if(file_validated) {
+                    	manager.send_file(selectedFile.getAbsolutePath(), selectedFile.getName());
                     	JOptionPane.showMessageDialog(null, "Enviado ");
                     }
                     else {
@@ -240,7 +240,16 @@ public class P2P_View extends JFrame {
 		text_send_message.setText("");
     }
 	
-	private void send_file() {
+	private boolean validate_file(String name) {
+		short size = (short) name.length();
+		String extention_file = name.substring(size - 3);
 		
+		if (	extention_file.equals("pdf")
+				|| extention_file.equals("mp3")
+				|| extention_file.equals("jpg")
+				|| extention_file.equals("png")
+				|| extention_file.equals("txt"))	return true;
+		
+		return false;
 	}
 }

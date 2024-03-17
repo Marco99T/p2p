@@ -1,27 +1,33 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilePermission;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.security.AccessController;
+import java.security.Permission;
 
+import javax.annotation.processing.FilerException;
 import javax.swing.JTextArea;
 
 public class Manager_Files 	extends Thread{
 	private MulticastSocket socket;
-	private InetAddress host;
+	private InetAddress group;
 	private int port;
 	
-	private JTextArea chat_files;
+	private JTextArea text_area_chat_files;
 
 	
-	public Manager_Files(String host, int port, JTextArea chat_files){
-		this.chat_files = chat_files;
+	public Manager_Files(String address, int port, JTextArea chat_files){
+		this.text_area_chat_files = chat_files;
 		try {
 			this.socket = new MulticastSocket(port);
-			this.host = InetAddress.getByName(host);
+			this.group = InetAddress.getByName(address);
 			this.port = port;
+			this.socket.joinGroup(group);
 			
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -29,210 +35,82 @@ public class Manager_Files 	extends Thread{
 	}
 
 	
-	@SuppressWarnings("resource")
-	public boolean send_file(String path, String name) {
-		/*
-		//Ruta del archivo
-		File file = new File(path);
-		
-
-        // Abrir flujo de entrada para leer el archivo
-        FileInputStream file_input = null;
-		try {
-			file_input = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		
-		// Tamaño del buffer para leer el archivo
-        int buffer_size = 1024;
-        byte[] buffer = new byte[buffer_size];
-
-        int bytes_read;
-        long file_size = file.length();
-
-        // Envío del tamaño del archivo
-        String file_size_string = String.valueOf(file_size);
-        DatagramPacket file_size_packet = new DatagramPacket(file_size_string.getBytes(), file_size_string.getBytes().length, this.host, this.port);
-        try {
-			this.socket.send(file_size_packet);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-
-        // Envío del archivo en paquetes
-        try {
-			while ((bytes_read = file_input.read(buffer)) != -1) {
-				DatagramPacket packet = new DatagramPacket(buffer, bytes_read, host, port);
-			    this.socket.send(packet);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-        
-
-        // Cierre del flujo de entrada y el socket
-        
-        try {
-	        file_input.close();
-	        //this.socket.close();
-        }	catch(IOException e) {
-        	System.out.println(e.getMessage());
-        }
-        */
-		
-		
+	public void send_file(String path, String name) {
 		
 		try {
-			
             // Leer el archivo que deseas enviar
             File file = new File(path);
-            FileInputStream fileInputStream = new FileInputStream(file);
+            String file_info = name + ";" + file.length();
+            byte[] file_info_data = file_info.getBytes("UTF-8");
+            int bytes_readed;
             
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                DatagramPacket packet = new DatagramPacket(buffer, bytesRead, host, port);
-                socket.send(packet);
+            FileInputStream file_input_stream = new FileInputStream(file);
+            DatagramPacket packet_info = new DatagramPacket(file_info_data, file_info_data.length, group, port);
+            socket.send(packet_info);
+            
+            while ((bytes_readed = file_input_stream.read(new byte [1024])) != -1) {
+            	DatagramPacket packet_data = new DatagramPacket(new byte [1024], bytes_readed, group, port);
+                socket.send(packet_data);
             }
-
+            
             System.out.println("Archivo enviado correctamente.");
-
-            // Cerrar el socket
             //this.socket.close();
-            fileInputStream.close();
+            file_input_stream.close();
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
 	}
 	
+	//BUG OPENING THE FILE.
+	@SuppressWarnings("resource")
 	public void run () {
-		/*
-		long file_size = 0;
-        byte[] buffer = new byte[1024];
-        
-		//Unirme a grupo multicast
 		try {
-			this.socket.joinGroup(host);
-			
-			// Recibir el tamaño del archivo
-	        DatagramPacket file_size_packet = new DatagramPacket(buffer, buffer.length);
-	        try {
-				this.socket.receive(file_size_packet);
-				String file_size_string = new String(file_size_packet.getData()).trim();
-				if (!file_size_string.isEmpty()) {
-					file_size = Long.parseLong(file_size_string);
-				}
-				else {
-					System.out.println("No hay datos");
-				}
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-			}
-	        
-
-	        // Flujo de salida para escribir el archivo
-	        FileOutputStream file_output = null;
-			try {
-				String ruta = "C:" + File.separator;
-				String 	directory = "P2P" + File.separator;
-				File directory_ = new File(ruta, directory);
-				
-				// Verificar si la carpeta existe
-		        if (!directory_.exists()) {
-		        	// Intentar crear la carpeta
-		            boolean carpetaCreada = directory_.mkdir();
-		            if (carpetaCreada) {
-		                System.out.println("La carpeta ha sido creada con éxito.");
-		            } else {
-		                System.out.println("Error al crear la carpeta.");
-		            }
-		        } 
-				
-				file_output = new FileOutputStream(ruta + directory + "testing.png");
-			} catch (FileNotFoundException e) {
-				System.out.println(e.getMessage());
-			}
-			System.out.println("Archivo recibido");
-	        // Recepción de paquetes y escritura en el archivo
-			
-	        while (file_size > 0) {
-	            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-	            try {
-	            	synchronized(this) {
-						socket.receive(packet);
-						file_output.write(packet.getData(), 0, packet.getLength());
-			            file_size -= packet.getLength();
-	            	}
-				} catch (IOException e) {
-					//System.out.println("Error" + e.getMessage());
-				}
-	        }
-
-	        // Cierre del flujo de salida y el socket
-	        try {
-				//file_output.close();
-				socket.leaveGroup(host);
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-			}
-	        //socket.close();
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-        */
-		
-		//FALTA SOLUCIONAR PROBLEMA PARA RECIBIR VARIOS ARCHIVOS
-		
-		try {
-			MulticastSocket socket_serve = new MulticastSocket(this.port);
-            socket_serve.joinGroup(host);
-            String ruta = "C:" + File.separator;
-			String 	directory = "P2P" + File.separator;
+			String 	directory = File.separator + "files_recived" + File.separator;
+			String directory_actually = System.getProperty("user.dir");
 			
 			//Validar directorio		
-			File directory_ = new File(ruta, directory);
+			File directory_ = new File(directory_actually, directory);
 	        if (!directory_.exists()) {
-	            boolean carpetaCreada = directory_.mkdir();
-	            if (carpetaCreada) {
-	                System.out.println("La carpeta ha sido creada con éxito.");
-	            } else {
-	                System.out.println("Error al crear la carpeta.");   
+	            boolean drectory_maked = directory_.mkdir();
+	            if (!drectory_maked) {
+	            	throw new FileNotFoundException("Error al crear el archivo");
 	            }
 	        }
-			
-	        // Crear un buffer para recibir los datos
-            byte[] buffer = new byte[1024];
-
-            // Crear un paquete para recibir los datos
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
-            // Crear el archivo de salida
-            FileOutputStream fileOutputStream = new FileOutputStream(ruta + directory + "archivo_reci.png");
-
-            // Recibir y escribir los datos hasta que se reciba el archivo completo
-            while (true) {
-            	synchronized(this) {
-	                socket_serve.receive(packet);
-	                fileOutputStream.write(packet.getData(), 0, packet.getLength());
-	                if (packet.getLength() < buffer.length) {
-	                    break; // Se ha recibido el archivo completo
-	                }
-            	}
-                System.out.println("dentro..");
-            }
-            fileOutputStream.close();
-            System.out.println("Archivo recibido y guardado correctamente.");
+			   
+	        while(true) {
+	            DatagramPacket packet_info = new DatagramPacket(new byte [1024], 1024, group, port);
+	            socket.receive(packet_info);
+	            
+	            String file_info = new String(packet_info.getData(), 0, packet_info.getLength(), "UTF-8");
+	            String[] file_info_array = file_info.split(";");
+	            String file_name = file_info_array[0];
+	            long file_size = Long.parseLong(file_info_array[1]);
+	            
+	            String rute = directory_actually + directory + file_name;
+	            FileOutputStream file_output_stream = new FileOutputStream(rute.trim());
+	            byte[] buffer = new byte[1024];
+	            long total_bytes_received = 0;
+	            
+	            while (total_bytes_received < file_size) {
+	                DatagramPacket packet_data = new DatagramPacket(buffer, buffer.length);
+	                socket.receive(packet_data);
+	                file_output_stream.write(packet_data.getData(), 0, packet_data.getLength());
+	                total_bytes_received += packet_data.getLength();
+	            }
+	            
+	            if (total_bytes_received == file_size) {
+	                System.out.println("Se ha recibido el archivo correctamente: " + file_name);
+	            } else {
+	                throw new FilerException("Error al guardar el archivo");
+	            }
+	            
+	            file_output_stream.close();
+	            text_area_chat_files.append("Achivo: " + file_name+ " recivido." + "\n");
+	        }
+            //socket.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
-		chat_files.append("Recibibo" + "\n");
     }
 
 }
