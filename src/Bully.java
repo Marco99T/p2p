@@ -38,6 +38,16 @@ public class Bully implements Runnable{
 		
 	}
 
+
+	protected void verify_leader() {
+		String message = "Leader " + this.ID;
+        DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, port);
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+	}
 	
 	public void send_message() {
 		if(!elector_lock && !coordinador){
@@ -63,39 +73,45 @@ public class Bully implements Runnable{
 				int id_candidate = Integer.parseInt(data.get(1));
 				
 				if(coordinador){
-                    //System.out.println("Soy el coordinador "+id);
                     message_from_coordinator();
-                    String message = "";
-                    message = "Soy el coordinado (" + this.ID + ") \n";
+                    String message = "Soy el coordinado (" + this.ID + ") \n";
                     text_area_chat_algortimos_1.append(message);
                 }
 				else {
 					switch(message_cadidate) {
 						case "Coordinador":
 							this.elector_lock = false;
-					        //System.out.println("El coordinador actual es: "+id_rec+" soy: "+id);
-					        String message = "";
-					        message = "El coordinador actual es: " + 5 + "\n Soy: " + id_candidate + "\n";
+					        String message = "El coordinador actual es: " + id_candidate + "\n";
 					        text_area_chat_algortimos_1.append(message);
 							break;
 						case "Eleccion":
-							/*
-							if(this.votos >3){
-					            this.coordinador = true;
-					            String status = "";
-					            status = "Votos: " + this.votos + " en :" + this.ID + " \n Coordinador: " + this.coordinador + "\n";
-					            text_area_chat_algortimos_1.append(status);
-					        }
-					        */
-							//Enviamos el token al siguiente candidato si el nodo actual es mas grande que el anterior
 					        if(this.ID > id_candidate){
 					            elector_lock=true;
 					            text_area_chat_algortimos_1.append("Soy candidato(" + this.ID +") \n");
-					            send_message();
-					            
+					            message_to_select();
 					        }
 							break;
-						case "a":
+						case "Desconectado":
+							String message_to_nodes = "El coordinador: " + id_candidate + " se ha desconectado. \n";
+					        text_area_chat_algortimos_1.append(message_to_nodes);
+							break;
+						case "Leader":
+							String message_to_ip = "";
+							if (this.coordinador) {
+								message_to_ip = "Coordinador " + this.ID;
+							}
+					        else {
+					        	message_to_ip = "NoLeader " + this.ID;
+							}
+							try {
+						        DatagramPacket packet_to_ip = new DatagramPacket(message_to_ip.getBytes(), message_to_ip.getBytes().length, InetAddress.getByName(address), port);
+					            socket.send(packet_to_ip);
+					        } catch (IOException e) {
+					            System.out.println(e.getMessage());
+					        }
+							break;
+						case "NoLeader":
+							text_area_chat_algortimos_1.append("No hay coordinador. \n");
 							break;
 						default:
 							break;
@@ -103,16 +119,6 @@ public class Bully implements Runnable{
 				}
 			}
 			else {
-				elector_lock = false;
-				String data_from_packet = new String(pack_.getData());
-				ArrayList <String> data = get_data_from_datagrampacket(data_from_packet);
-				String message_cadidate = data.get(0);
-				int id_candidate = Integer.parseInt(data.get(1));
-				if (this.ID == id_candidate && elector_lock == true) {
-					System.out.println("Soy el lider");
-					this.coordinador = true;
-					message_from_coordinator();
-				}
 			}
 		}catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -120,75 +126,7 @@ public class Bully implements Runnable{
 			
 	}
 
-	/*
-	public void run() {
-		try {
-            DatagramPacket paquete;
-            socket.setTimeToLive(0);
-            while(true){
-                if(coordinador){
-                    //System.out.println("Soy el coordinador "+id);
-                    message_from_coordinator();
-                    String message = "";
-                    message = "Soy el coordinado (" + this.ID + ") \n";
-                    text_area_chat_algortimos_1.append(message);
-                }
-                else{
-                	if(!elector_lock && !coordinador){
-
-                        //System.out.println("Se envia mensaje eleccion: "+id);
-                    	message_to_select();
-                    	String  message = "";
-                    	message = "Se envia mensaje de eleccion con id:" + this.ID + " \n";
-                        text_area_chat_algortimos_1.append(message);
-                    }
-                    try {
-                    	
-                    	
-                        byte buffer[]= new byte[20];
-                        paquete=new DatagramPacket(buffer,buffer.length);
-                        socket.receive(paquete);
-
-                        ArrayList<String >data = get_data_from_datagrampacket(paquete.getData());
-
-                        String message_nodo = String.valueOf(data.get(0));
-                        int id_nodo = Integer.parseInt(data.get(1));
-                        System.out.println(id_nodo);
-
-                        if(message_nodo.equalsIgnoreCase("Coordinador")){
-                            elector_lock = false;
-                            //System.out.println("El coordinador actual es: "+id_rec+" soy: "+id);
-                            String message = "";
-                            message = "El coordinador actual es: " + id_nodo + "\n Soy: " + this.ID + "\n";
-                            text_area_chat_algortimos_1.append(message);
-
-                        }
-                        if(message_nodo.equalsIgnoreCase("Eleccion")){
-                            if(this.votos >3){
-                                this.coordinador = true;
-                                //System.out.println("Count: "+count+" en: "+id+"Coordinador: "+Coordinador);
-                                String status = "";
-                                status = "Votos: " + this.votos + " en :" + this.ID + " \n Coordinador: " + this.coordinador + "\n";
-                                text_area_chat_algortimos_1.append(status);
-                            }
-                            if(this.ID > id_nodo){
-                                elector_lock=true;
-                            }
-                            if(this.ID <= id_nodo){
-                                votos++;
-                            }
-                        }
-                    } catch (Exception e) {
-                    	System.out.println(e.getMessage());
-                    }
-                }
-                Thread.sleep(3000);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-	}
-	*/
+	
 	
 	private void message_from_coordinator(){
         byte buffer []= ("Coordinador (" + this.ID + ")").getBytes();
@@ -226,5 +164,25 @@ public class Bully implements Runnable{
         lista.add(id_nodo);
         return lista;
     }
+	
+	public boolean notify_nodes_there_is_no_leader() {
+		if (this.coordinador) {
+			byte buffer []= ("Desconectado (" + this.ID + ")").getBytes();
+	        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
+	        try {
+	            socket.send(packet);
+	        } catch (Exception e) {
+	            System.out.println(e.getMessage());
+	        }
+	        return true;
+		}
+		return false;
+	}
+	
+	private void notify_i_am_leader() {
+		if(this.coordinador) {
+			message_from_coordinator();
+		}
+	}
 
 }

@@ -231,6 +231,7 @@ public class P2P_View extends JFrame {
 		//new Thread (anillo).start();
 		bully = new Bully(host, port + 1500, text_area_chat_algoritmos_1);
 		new Thread(bully).start();
+		bully.verify_leader();
 	}
 	
 

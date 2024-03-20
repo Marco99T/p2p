@@ -17,6 +17,7 @@ public class Manager_Files 	extends Thread{
 	private MulticastSocket socket;
 	private InetAddress group;
 	private int port;
+	private String IP;
 	
 	private JTextArea text_area_chat_files;
 
@@ -28,7 +29,7 @@ public class Manager_Files 	extends Thread{
 			this.group = InetAddress.getByName(address);
 			this.port = port;
 			this.socket.joinGroup(group);
-			
+			this.IP = String.valueOf(InetAddress.getLocalHost().getHostAddress());
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
@@ -41,19 +42,19 @@ public class Manager_Files 	extends Thread{
             // Leer el archivo que deseas enviar
             File file = new File(path);
             String file_info = name + ";" + file.length();
-            byte[] file_info_data = file_info.getBytes("UTF-8");
+            byte[] file_info_data = file_info.getBytes();
             int bytes_readed;
+            byte[] buffer = new byte[1024];
             
             FileInputStream file_input_stream = new FileInputStream(file);
             DatagramPacket packet_info = new DatagramPacket(file_info_data, file_info_data.length, group, port);
             socket.send(packet_info);
             
-            while ((bytes_readed = file_input_stream.read(new byte [1024])) != -1) {
-            	DatagramPacket packet_data = new DatagramPacket(new byte [1024], bytes_readed, group, port);
+            while ((bytes_readed = file_input_stream.read(buffer)) != -1) {
+            	DatagramPacket packet_data = new DatagramPacket(buffer, bytes_readed, group, port);
                 socket.send(packet_data);
             }
-            
-            System.out.println("Archivo enviado correctamente.");
+            text_area_chat_files.append("Achivo: " +name+ " enviado." + "\n");
             //this.socket.close();
             file_input_stream.close();
         } catch (IOException e) {
@@ -65,6 +66,7 @@ public class Manager_Files 	extends Thread{
 	@SuppressWarnings("resource")
 	public void run () {
 		try {
+            
 			String 	directory = File.separator + "files_recived" + File.separator;
 			String directory_actually = System.getProperty("user.dir");
 			
@@ -80,32 +82,36 @@ public class Manager_Files 	extends Thread{
 	        while(true) {
 	            DatagramPacket packet_info = new DatagramPacket(new byte [1024], 1024, group, port);
 	            socket.receive(packet_info);
+	            String address = String.valueOf(packet_info.getAddress().getHostAddress());
+				
+				if(!address.equals(this.IP)){
 	            
-	            String file_info = new String(packet_info.getData(), 0, packet_info.getLength(), "UTF-8");
-	            String[] file_info_array = file_info.split(";");
-	            String file_name = file_info_array[0];
-	            long file_size = Long.parseLong(file_info_array[1]);
-	            
-	            String rute = directory_actually + directory + file_name;
-	            FileOutputStream file_output_stream = new FileOutputStream(rute.trim());
-	            byte[] buffer = new byte[1024];
-	            long total_bytes_received = 0;
-	            
-	            while (total_bytes_received < file_size) {
-	                DatagramPacket packet_data = new DatagramPacket(buffer, buffer.length);
-	                socket.receive(packet_data);
-	                file_output_stream.write(packet_data.getData(), 0, packet_data.getLength());
-	                total_bytes_received += packet_data.getLength();
-	            }
-	            
-	            if (total_bytes_received == file_size) {
-	                System.out.println("Se ha recibido el archivo correctamente: " + file_name);
-	            } else {
-	                throw new FilerException("Error al guardar el archivo");
-	            }
-	            
-	            file_output_stream.close();
-	            text_area_chat_files.append("Achivo: " + file_name+ " recivido." + "\n");
+		            String file_info = new String(packet_info.getData(), 0, packet_info.getLength());
+		            String[] file_info_array = file_info.split(";");
+		            String file_name = file_info_array[0];
+		            long file_size = Long.parseLong(file_info_array[1]);
+		            
+		            String rute = directory_actually + directory + file_name;
+		            FileOutputStream file_output_stream = new FileOutputStream(rute.trim());
+		            byte[] buffer = new byte[1024];
+		            long total_bytes_received = 0;
+		            
+		            while (total_bytes_received < file_size) {
+		                DatagramPacket packet_data = new DatagramPacket(buffer, buffer.length);
+		                socket.receive(packet_data);
+		                file_output_stream.write(packet_data.getData(), 0, packet_data.getLength());
+		                total_bytes_received += packet_data.getLength();
+		            }
+		            
+		            if (total_bytes_received == file_size) {
+		                System.out.println("Se ha recibido el archivo correctamente: " + file_name);
+		            } else {
+		                throw new FilerException("Error al guardar el archivo");
+		            }
+		            
+		            file_output_stream.close();
+		            text_area_chat_files.append("Achivo: " + file_name+ " recivido." + "\n");
+				}
 	        }
             //socket.close();
         } catch (Exception e) {
