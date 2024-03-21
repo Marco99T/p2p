@@ -2,15 +2,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilePermission;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.security.AccessController;
-import java.security.Permission;
-
-import javax.annotation.processing.FilerException;
 import javax.swing.JTextArea;
 
 public class Manager_Files 	extends Thread{
@@ -106,17 +101,15 @@ public class Manager_Files 	extends Thread{
 		            if (total_bytes_received == file_size) {
 		                System.out.println("Se ha recibido el archivo correctamente: " + file_name);
 		            } else {
-		                throw new FilerException("Error al guardar el archivo");
+		                System.out.println("Error al guardar el archivo");
 		            }
 		            
 		            file_output_stream.close();
 		            text_area_chat_files.append("Achivo: " + file_name+ " recivido." + "\n");
 				}
 	        }
-            //socket.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-
 }
