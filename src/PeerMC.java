@@ -10,19 +10,19 @@ import javax.swing.JTextArea;
 public class PeerMC implements Runnable{
 	
     private MulticastSocket socket;
-    private InetAddress host;
+    private InetAddress group;
     private DatagramPacket packet;
     private int port;
     private JTextArea text_area_chat;
     
-    public PeerMC(String group, int port, JTextArea text_area_chat){
+    public PeerMC(String host, int port, JTextArea text_area_chat){
     	
     	this.text_area_chat = text_area_chat;
         try {
             this.socket = new MulticastSocket(port);
-            this.host = InetAddress.getByName(group);
+            this.group = InetAddress.getByName(host);
             this.port = port;
-            this.socket.joinGroup(host);
+            this.socket.joinGroup(group);
         } 
         catch (Exception e) {
         	 System.out.println(e.getMessage());
@@ -38,7 +38,7 @@ public class PeerMC implements Runnable{
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
 			objectOutputStream.writeObject(person);
             byte[] data = byteArrayOutputStream.toByteArray();
-            this.packet = new DatagramPacket(data, data.length, host, port);
+            this.packet = new DatagramPacket(data, data.length, group, port);
             this.socket.send(packet);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

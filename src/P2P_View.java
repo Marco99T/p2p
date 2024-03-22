@@ -60,8 +60,9 @@ public class P2P_View extends JFrame {
 		setAutoRequestFocus(false);
 		setTitle("P2P");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1258, 700);
+		setBounds(100, 100, 1260, 750);
 		contentPane = new JPanel();
+		contentPane.setBackground(new Color(0, 255, 255));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		setContentPane(contentPane);
@@ -173,6 +174,7 @@ public class P2P_View extends JFrame {
 		panel_EOD.add(btn_send_file);
 		
 		text_area_chat_files = new JTextArea();
+		text_area_chat_files.setBackground(new Color(106, 90, 205));
 		text_area_chat_files.setEditable(false);
 		
 		JScrollPane scroll_chat_files = new JScrollPane(text_area_chat_files);
@@ -216,6 +218,17 @@ public class P2P_View extends JFrame {
 		panel_chat.add(text_nickname);
 		text_nickname.setColumns(10);
 		
+		JButton btn_exit = new JButton("Salir");
+		btn_exit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				bully.notify_disconeccted();
+				System.exit(0);
+			}
+		});
+		btn_exit.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btn_exit.setBounds(980, 680, 150, 30);
+		contentPane.add(btn_exit);
+		
 		start_objects("224.0.0.4", 5000);
 		
 	}
@@ -231,7 +244,6 @@ public class P2P_View extends JFrame {
 		//new Thread (anillo).start();
 		bully = new Bully(host, port + 1500, text_area_chat_algoritmos_1);
 		new Thread(bully).start();
-		bully.verify_leader();
 	}
 	
 
