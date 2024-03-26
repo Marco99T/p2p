@@ -4,137 +4,115 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JTextArea;
 
-public class Anillo implements Runnable{
-	
-	private MulticastSocket socket;
-	private InetAddress group;
-	private boolean coordinador=false;
-    private boolean elector_lock=false;
-	private int port;
-	private int ID;
-	private int votos;
-	private String IP;
-	
-	private JTextArea text_area_chat_algortimos_1;
-	
-	public Anillo(String host, int port, JTextArea text_are_chat_algoritmo_1) {
-		try {
-			this.port = port;
-			this.socket = new MulticastSocket(port);
-			this.group = InetAddress.getByName(host);
-			this.socket.joinGroup(group);
-			this.text_area_chat_algortimos_1 = text_are_chat_algoritmo_1;
-			this.ID = Integer.parseInt(InetAddress.getLocalHost().getHostAddress().substring(5).replace(".", ""));
+public class Anillo extends Thread {
+    private MulticastSocket socket;
+    private InetAddress group;
+    private int port;
+    private int ID;
+    private String IP;
+    private boolean lider = false;
+    private int liderID = -1;
+    private JTextArea textArea;
+    private List<Integer> vecinos = new ArrayList<>();
+
+    public Anillo(String host, int port, JTextArea textArea) {
+        try {
+            this.port = port;
+            this.textArea = textArea;
+            this.socket = new MulticastSocket(port);
+            this.group = InetAddress.getByName(host); // Dirección de grupo multicast
+            this.socket.joinGroup(group);
+            this.ID = Integer.parseInt(InetAddress.getLocalHost().getHostAddress().substring(6).replace(".", ""));
 			this.IP = String.valueOf(InetAddress.getLocalHost().getHostAddress());
-			this.votos = 0;
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-		
-	}
-	
-    
-	public void send_message() {
-
-		if(!elector_lock && !coordinador){
-        	message_to_select();
-        	String  message = "Se envia mensaje de eleccion con id:" + this.ID + " \n";
-            text_area_chat_algortimos_1.append(message);
+            mostrarMensaje("Nodo iniciado. ID: " + ID);
+        } catch (IOException e) {
+            mostrarMensaje("Error al iniciar el nodo: " + e.getMessage());
         }
-	}
-
-	public void run() {
-		DatagramPacket pack_ = new DatagramPacket(new byte[1024], 1024);
-		try {
-			this.socket.receive(pack_);
-			String address = String.valueOf(pack_.getAddress().getHostAddress());
-			
-			if(address.equals(this.IP)){
-				//Validamos que es los que se esta recibiendo
-				ArrayList <String> data = get_data_from_datagrampacket(pack_.getData());
-				String message_cadidate = data.get(0);
-				int id_candidate = Integer.parseInt(data.get(1));
-				
-				System.out.println(message_cadidate);
-				
-				switch(message_cadidate) {
-					case "Coordinador":
-						this.elector_lock = false;
-	                    //System.out.println("El coordinador actual es: "+id_rec+" soy: "+id);
-	                    String message = "";
-	                    message = "El coordinador actual es: " + 5 + "\n Soy: " + this.ID + "\n";
-	                    text_area_chat_algortimos_1.append(message);
-						break;
-					case "Eleccion":
-						if(this.votos >3){
-	                        this.coordinador = true;
-	                        String status = "";
-	                        status = "Votos: " + this.votos + " en :" + this.ID + " \n Coordinador: " + this.coordinador + "\n";
-	                        text_area_chat_algortimos_1.append(status);
-	                    }
-	                    if(this.ID > id_candidate){
-	                        elector_lock=true;
-	                        text_area_chat_algortimos_1.append("Soy candidato(" + this.ID +") \n");
-	                    }
-	                    else{
-	                        votos++;
-	                        System.out.println(id_candidate);
-	                    }
-						break;
-					case "a":
-						break;
-					default:
-						break;
-				}
-			}
-			else {
-				System.out.println("Esto reciviendo datos en mi misma pc");
-			}
-		}catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
     }
 
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                byte[] buffer = new byte[1024];
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+                
+                String message = new String(packet.getData(), 0, packet.getLength());
+                procesarMensaje(message);
+            } catch (IOException e) {
+                mostrarMensaje("Error al recibir datos: " + e.getMessage());
+            }
+        }
+    }
 
-	private void message_to_select(){
-        String message = "Eleccion " + this.ID;
-        DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, port);
+    public void iniciarElección() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (!lider && liderID == -1) {
+                    enviarMensaje("ELECCIÓN " + ID);
+                    mostrarMensaje("Soy candidato para liderazgo.");
+                }
+            }
+        }, 0, 5000); // Verificar cada 5 segundos
+    }
+
+    private void procesarMensaje(String message) {
+        String[] parts = message.split(" ");
+        String messageType = parts[0];
+        int senderID = Integer.parseInt(parts[1]);
+
+        switch (messageType) {
+            case "ELECCIÓN":
+                if (senderID > ID) {
+                    enviarMensaje("ELECCIÓN " + senderID);
+                    mostrarMensaje("Soy candidato para liderazgo.");
+                } else if (senderID < ID) {
+                    // Ignorar elecciones de nodos con ID más bajo
+                } else {
+                    // Tengo el mismo ID, soy el líder
+                    lider = true;
+                    liderID = ID;
+                    mostrarMensaje("¡Soy el líder! ID: " + liderID);
+                    enviarMensaje("LIDER " + liderID);
+                }
+                break;
+            case "LIDER":
+                int newLiderID = Integer.parseInt(parts[1]);
+                liderID = newLiderID;
+                mostrarMensaje("Nuevo líder elegido. ID: " + liderID);
+                break;
+            default:
+                mostrarMensaje("Mensaje no reconocido: " + message);
+                break;
+        }
+    }
+
+    private void enviarMensaje(String message) {
         try {
+            DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, port);
             socket.send(packet);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            mostrarMensaje("Error al enviar mensaje: " + e.getMessage());
         }
-	}
-	
-	private ArrayList<String> get_data_from_datagrampacket(byte []cad){
-        ArrayList<String> lista= new ArrayList<String>();
-        String message = "";
-        String id_nodo  ="";
-        String cadena=new String(cad);
-        for(char c:cadena.toCharArray()){
-            if(Character.isAlphabetic(c)){
-                message += c;
-            }
-            if(Character.isDigit(c)){
-                id_nodo += c;
-            }
-        }
-        lista.add(message);
-        lista.add(id_nodo);
-        return lista;
     }
-	
-	private void message_from_coordinator(){
-        byte buffer []= ("Coordinador (" + this.ID + ")").getBytes();
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
-        try {
-            socket.send(packet);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+
+    private int obtenerID() {
+        // Lógica para obtener un ID único para este nodo
+        return 1; // Por ahora, un ID fijo
+    }
+
+    private void mostrarMensaje(String message) {
+    	textArea.append(message + "\n");
+        System.out.println(message);
     }
 }

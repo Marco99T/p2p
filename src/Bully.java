@@ -18,17 +18,20 @@ public class Bully implements Runnable{
 	private String IP;
     private boolean is_there_coordinador;
     private boolean receivedData = false;
+    private boolean status = false;
+    private Timer timer_to_be_coordinador;
 	
 	private JTextArea text_are_chat_algoritmo_1;
 	
 	public Bully(String host, int port, JTextArea text_are_chat_algoritmo_1) {
+		timer_to_be_coordinador = new Timer();
+		this.text_are_chat_algoritmo_1 = text_are_chat_algoritmo_1;
 		try {
             this.is_there_coordinador = false;
 			this.port = port;
 			this.socket = new MulticastSocket(port);
 			this.group = InetAddress.getByName(host);
 			this.socket.joinGroup(group);
-			this.text_are_chat_algoritmo_1 = text_are_chat_algoritmo_1;
 			this.ID = Integer.parseInt(InetAddress.getLocalHost().getHostAddress().substring(6).replace(".", ""));
 			this.IP = String.valueOf(InetAddress.getLocalHost().getHostAddress());
             this.verify_leader();
@@ -40,11 +43,10 @@ public class Bully implements Runnable{
 
 	
 	public void run() {
-        Timer timer = new Timer();
 		DatagramPacket pack_ = new DatagramPacket(new byte[1024], 1024);
 		try {
+			//Case when start to search a leader
             while (true) {
-                
                 this.socket.receive(pack_);
                 String address = String.valueOf(pack_.getAddress().getHostAddress());
                 
@@ -59,6 +61,9 @@ public class Bully implements Runnable{
                         message_from_coordinator();
                         //String message = "Soy el coordinador (" + this.ID + ") \n";
                         //text_are_chat_algoritmo_1.append(message);
+                    }
+                    else if(!this.is_there_coordinador || !this.coordinador) {
+                    	message_no_leader();
                     }
                     else {
                         switch(message_cadidate) {
@@ -76,6 +81,7 @@ public class Bully implements Runnable{
                                     this.elector_lock=true;
                                     text_are_chat_algoritmo_1.append("Soy candidato(" + this.ID +") \n");
                                     message_to_select();
+                                    message_to_change_status_of_nodo(address);
                                 }
                                 break;
                             case "Desconectado":
@@ -86,49 +92,17 @@ public class Bully implements Runnable{
                                     text_are_chat_algoritmo_1.append(message_to_nodes);
                                 }
                                 break;
+                            case "NoLeader":
+                            	//timer_to_be_coordinador.cancel();
+                            	break;
+                            case "Status":
+                            	this.status = true;
+                            	break;
                             default:
                                 break;
                         }
                     }
-                    if(!this.is_there_coordinador && !this.elector_lock && !this.coordinador){
-                        this.text_are_chat_algoritmo_1.append("No hay coordinador. \n");
-                    }
-                }
-                
-                else if(address.equals(this.IP) && this.elector_lock){  //Case when we want so select a leader
-                    timer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if (!coordinador) {
-                                // Acción a realizar si no se han recibido datos dentro del intervalo de tiempo
-                                text_are_chat_algoritmo_1.append("Soy ahora el coordinador...: " + ID +".\n");
-                                message_from_coordinator();
-                                coordinador = true; // Reiniciar el indicador de recepción de datos
-                            }
-                            //receivedData = false;
-                        }
-                    }, 7000, 3000);
-                    if(coordinador){
-                        timer.cancel();
-                        text_are_chat_algoritmo_1.append("tempo cancelado. \n");
-                    }
-                }
-                
-                else{   //Case when start to search a leader
-                    timer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if (!coordinador) {
-                                // Acción a realizar si no se han recibido datos dentro del intervalo de tiempo
-                                text_are_chat_algoritmo_1.append("Soy ahora el coordinador: " + ID +".\n");
-                                message_from_coordinator();
-                                coordinador = true;// Reiniciar el indicador de recepción de datos
-                            }
-                        }
-                    }, 7000, 1000);
-                    if(this.coordinador){
-                        timer.cancel();
-                    }
+                    
                 }
             }
 		}
@@ -185,6 +159,32 @@ public class Bully implements Runnable{
         DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, port);
         try {
             socket.send(packet);
+            timer_to_be_coordinador.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    if ((!status && elector_lock) || (!is_there_coordinador && !coordinador)) {
+                        // Acción a realizar si no se han recibido datos dentro del intervalo de tiempo
+                        text_are_chat_algoritmo_1.append("Soy ahora el coordinador: " + ID +".\n");
+                        message_from_coordinator();
+                        coordinador = true;// Reiniciar el indicador de recepción de datos
+                        elector_lock = false;
+                        is_there_coordinador = true;
+                    }
+                }
+            }, 5000, 3000);
+            /*
+            Timer timer = new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+                public void run(){
+                    
+                    if(!is_there_coordinador && !coordinador){
+                        text_are_chat_algoritmo_1.append("No hay coordinador. \n");
+                    }else{
+                        this.cancel();
+                    }
+                }
+            }, 2000, 3000);
+            */
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -203,6 +203,26 @@ public class Bully implements Runnable{
         DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, port);
         try {
             this.coordinador = false;
+            socket.send(packet);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    private void message_no_leader() {
+    	String message = "NoLeader " + this.ID;
+        DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, port);
+        try {
+            socket.send(packet);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    private void message_to_change_status_of_nodo(String address) {
+    	String message = "Status " + this.ID;
+        try {
+        	DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, InetAddress.getByName(address), port);
             socket.send(packet);
         } catch (IOException e) {
             System.out.println(e.getMessage());
