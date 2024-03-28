@@ -132,7 +132,7 @@ public class Bully extends Thread{
 	}
 
 	private void message_from_coordinator(){
-        byte buffer []= ("Coordinador " + this.ID).getBytes();
+        byte buffer []= ("Coordinador " + this.ID + ".").getBytes();
         DatagramPacket packet = new DatagramPacket
         (
             buffer, buffer.length, 
@@ -146,7 +146,7 @@ public class Bully extends Thread{
     }
 	
 	private void message_to_select(){
-        String message = "Eleccion " + this.ID;
+        String message = "Eleccion " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
             message.getBytes(), message.getBytes().length, 
@@ -169,7 +169,7 @@ public class Bully extends Thread{
             if(Character.isAlphabetic(c)){
                 message += c;
             }
-            if(Character.isDigit(c) && id < 5){
+            if(Character.isDigit(c) && id < 4){
                 id_nodo += c;
                 id ++;
             }
@@ -183,7 +183,7 @@ public class Bully extends Thread{
     }
 
     protected void verify_leader() {
-		String message = "Leader " + this.ID;
+		String message = "Leader " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
             message.getBytes(), message.getBytes().length, 
@@ -200,6 +200,7 @@ public class Bully extends Thread{
                         {
                             text_are_chat_algoritmo_bully.append("Soy ahora el coordinador: " + ID +".\n");
                             message_from_coordinator();
+                            coordinador = true;
                             elector_lock = false;
                             is_there_coordinador = true;
                         }
@@ -233,7 +234,7 @@ public class Bully extends Thread{
 	}
 
     public void notify_disconeccted(){
-        String message = "Desconectado " + this.ID;
+        String message = "Desconectado " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
             message.getBytes(), message.getBytes().length, 
@@ -248,7 +249,7 @@ public class Bully extends Thread{
     }
     
     private void message_no_leader() {
-    	String message = "NoLeader " + this.ID;
+    	String message = "NoLeader " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
             message.getBytes(), message.getBytes().length, 
@@ -262,7 +263,7 @@ public class Bully extends Thread{
     }
     
     private void message_to_change_status_of_nodo(String address) {
-    	String message = "Status " + this.ID;
+    	String message = "Status " + this.ID + ".";
         try {
         	DatagramPacket packet = new DatagramPacket
             (

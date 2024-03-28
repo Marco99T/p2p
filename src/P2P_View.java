@@ -132,7 +132,7 @@ public class P2P_View extends JFrame {
 		text_area_chat.setFont(new Font("Monospaced", Font.ITALIC, 12));
 		
 		JScrollPane scroll_chat = new JScrollPane(text_area_chat);
-		scroll_chat.setBounds(0, 0, 280, 470);
+		scroll_chat.setBounds(0, 0, 280, 440);
 		panel_chat.add(scroll_chat);
 		
 		JPanel panel_send_message = new JPanel();
@@ -245,12 +245,12 @@ public class P2P_View extends JFrame {
 		JLabel lbl_nickname = new JLabel("NICKNAME");
 		lbl_nickname.setFont(new Font("Arial", Font.BOLD, 12));
 		lbl_nickname.setHorizontalAlignment(SwingConstants.CENTER);
-		lbl_nickname.setBounds(0, 520, 110, 30);
+		lbl_nickname.setBounds(0, 440, 110, 30);
 		panel_chat.add(lbl_nickname);
 		
 		text_nickname = new JTextField();
 		text_nickname.setFont(new Font("Arial", Font.ITALIC, 12));
-		text_nickname.setBounds(110, 520, 170, 30);
+		text_nickname.setBounds(110, 440, 170, 30);
 		panel_chat.add(text_nickname);
 		text_nickname.setColumns(10);
 		
