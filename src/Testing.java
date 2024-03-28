@@ -10,8 +10,8 @@ public class Testing {
             InetAddress group = InetAddress.getByName("224.0.0.4");
             socket.joinGroup(group);
 
-            String message = "Eleccion 3821.";
-            DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, group, 6500);
+            String message = "Status 3821.";
+            DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, InetAddress.getByName("192.168.2.192"), 6500);
             socket.send(packet);
         }
         catch(Exception e){

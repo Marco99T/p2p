@@ -13,12 +13,16 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 
 public class P2P_View extends JFrame {
 
@@ -30,6 +34,8 @@ public class P2P_View extends JFrame {
     private JTextArea text_area_chat_algoritmo_anillo;
     private JTextField text_nickname;
     private JTextArea text_area_chat_files;
+    private JLabel lbl_IP_to_show;
+    private JLabel lbl_ID_to_show;
     
     
     private PeerMC peer;
@@ -62,7 +68,7 @@ public class P2P_View extends JFrame {
 		setAutoRequestFocus(false);
 		setTitle("P2P");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1260, 750);
+		setBounds(100, 100, 1150, 650);
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(0, 255, 255));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -70,27 +76,27 @@ public class P2P_View extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JPanel panel_algoritmo_1 = new JPanel();
-		panel_algoritmo_1.setBackground(Color.LIGHT_GRAY);
-		panel_algoritmo_1.setBounds(10, 75, 240, 580);
-		contentPane.add(panel_algoritmo_1);
-		panel_algoritmo_1.setLayout(null);
+		JPanel panel_algoritmos_eleccion = new JPanel();
+		panel_algoritmos_eleccion.setBackground(Color.LIGHT_GRAY);
+		panel_algoritmos_eleccion.setBounds(10, 60, 240, 500);
+		contentPane.add(panel_algoritmos_eleccion);
+		panel_algoritmos_eleccion.setLayout(null);
 		
 		text_area_chat_algoritmo_bully = new JTextArea();
 		text_area_chat_algoritmo_bully.setEditable(false);
 		text_area_chat_algoritmo_bully.setFont(new Font("Monospaced", Font.ITALIC, 12));
 		
 		JScrollPane scroll_chat_algoritmo_bully = new JScrollPane( text_area_chat_algoritmo_bully);
-		scroll_chat_algoritmo_bully.setBounds(0, 30, 240, 250);
-		panel_algoritmo_1.add(scroll_chat_algoritmo_bully);
+		scroll_chat_algoritmo_bully.setBounds(0, 30, 240, 210);
+		panel_algoritmos_eleccion.add(scroll_chat_algoritmo_bully);
 		
 		text_area_chat_algoritmo_anillo = new JTextArea();
 		text_area_chat_algoritmo_anillo.setFont(new Font("Monospaced", Font.ITALIC, 12));
 		text_area_chat_algoritmo_anillo.setEditable(false);
 		
 		JScrollPane scroll_chat_algoritmo_anillo = new JScrollPane(text_area_chat_algoritmo_anillo);
-		scroll_chat_algoritmo_anillo.setBounds(0, 330, 240, 250);
-		panel_algoritmo_1.add(scroll_chat_algoritmo_anillo);
+		scroll_chat_algoritmo_anillo.setBounds(0, 290, 240, 210);
+		panel_algoritmos_eleccion.add(scroll_chat_algoritmo_anillo);
 		
 		
 		JButton btn_bully = new JButton("Bully");
@@ -100,7 +106,7 @@ public class P2P_View extends JFrame {
 			}
 		});
 		btn_bully.setBounds(0, 0, 240, 30);
-		panel_algoritmo_1.add(btn_bully);
+		panel_algoritmos_eleccion.add(btn_bully);
 		
 		JButton btn_anillo = new JButton("Anillo");
 		btn_anillo.addActionListener(new ActionListener() {
@@ -108,16 +114,16 @@ public class P2P_View extends JFrame {
 				anillo.iniciarElección();
 			}
 		});
-		btn_anillo.setBounds(0, 300, 240, 30);
-		panel_algoritmo_1.add(btn_anillo);
+		btn_anillo.setBounds(0, 260, 240, 30);
+		panel_algoritmos_eleccion.add(btn_anillo);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBackground(Color.LIGHT_GRAY);
-		panel_1.setBounds(320, 75, 240, 580);
-		contentPane.add(panel_1);
+		JPanel panel_algoritmos_consencio = new JPanel();
+		panel_algoritmos_consencio.setBackground(Color.LIGHT_GRAY);
+		panel_algoritmos_consencio.setBounds(280, 60, 240, 500);
+		contentPane.add(panel_algoritmos_consencio);
 		
 		JPanel panel_chat = new JPanel();
-		panel_chat.setBounds(630, 74, 280, 580);
+		panel_chat.setBounds(550, 60, 280, 500);
 		contentPane.add(panel_chat);
 		panel_chat.setLayout(null);
 		
@@ -126,11 +132,11 @@ public class P2P_View extends JFrame {
 		text_area_chat.setFont(new Font("Monospaced", Font.ITALIC, 12));
 		
 		JScrollPane scroll_chat = new JScrollPane(text_area_chat);
-		scroll_chat.setBounds(0, 0, 280, 520);
+		scroll_chat.setBounds(0, 0, 280, 470);
 		panel_chat.add(scroll_chat);
 		
 		JPanel panel_send_message = new JPanel();
-		panel_send_message.setBounds(0, 550, 280, 30);
+		panel_send_message.setBounds(0, 470, 280, 30);
 		panel_chat.add(panel_send_message);
 		panel_send_message.setLayout(new BorderLayout(0, 0));
 		
@@ -153,7 +159,7 @@ public class P2P_View extends JFrame {
 		
 		JPanel panel_EOD = new JPanel();
 		panel_EOD.setBackground(Color.LIGHT_GRAY);
-		panel_EOD.setBounds(980, 74, 240, 580);
+		panel_EOD.setBounds(860, 60, 240, 500);
 		contentPane.add(panel_EOD);
 		panel_EOD.setLayout(null);
 		
@@ -176,19 +182,39 @@ public class P2P_View extends JFrame {
 				
 			}
 		});
-		btn_upload_file.setBounds(0, 550, 120, 30);
+		btn_upload_file.setBounds(0, 470, 120, 30);
 		panel_EOD.add(btn_upload_file);
 		
-		JButton btn_send_file = new JButton("Enviar");
-		btn_send_file.setBounds(120, 550, 120, 30);
-		panel_EOD.add(btn_send_file);
+		JButton btn_show_files = new JButton("Ver Archivos");
+		btn_show_files.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String ruta = "/files_recived";
+				String defau = System.getProperty("user.dir");
+				// Verificar si el Desktop es soportado
+				if (Desktop.isDesktopSupported()) {
+					Desktop desktop = Desktop.getDesktop();
+					File directorio = new File(defau + ruta);
+					
+					try {
+						// Abrir el directorio en el explorador de archivos
+						desktop.open(directorio);
+					} catch (IOException error) {
+						error.printStackTrace();
+					}
+				} else {
+					System.out.println("El Desktop no es soportado en este sistema.");
+				}
+			}
+		});
+		btn_show_files.setBounds(120, 470, 120, 30);
+		panel_EOD.add(btn_show_files);
 		
 		text_area_chat_files = new JTextArea();
 		text_area_chat_files.setBackground(new Color(106, 90, 205));
 		text_area_chat_files.setEditable(false);
 		
 		JScrollPane scroll_chat_files = new JScrollPane(text_area_chat_files);
-		scroll_chat_files.setBounds(0, 0, 240, 520);
+		scroll_chat_files.setBounds(0, 0, 240, 470);
 		panel_EOD.add(scroll_chat_files);
 		
 		
@@ -201,19 +227,19 @@ public class P2P_View extends JFrame {
 		JLabel lbl_algoritmos_2 = new JLabel("Algortimos de consorcio");
 		lbl_algoritmos_2.setHorizontalAlignment(SwingConstants.CENTER);
 		lbl_algoritmos_2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lbl_algoritmos_2.setBounds(320, 10, 240, 45);
+		lbl_algoritmos_2.setBounds(280, 10, 240, 45);
 		contentPane.add(lbl_algoritmos_2);
 		
 		JLabel lbl_chat = new JLabel("Chat");
 		lbl_chat.setHorizontalAlignment(SwingConstants.CENTER);
 		lbl_chat.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lbl_chat.setBounds(630, 10, 280, 45);
+		lbl_chat.setBounds(550, 10, 280, 45);
 		contentPane.add(lbl_chat);
 		
 		JLabel lbl_chat_EOD = new JLabel("Espacio de objetos distribuido");
 		lbl_chat_EOD.setHorizontalAlignment(SwingConstants.CENTER);
 		lbl_chat_EOD.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lbl_chat_EOD.setBounds(980, 10, 240, 45);
+		lbl_chat_EOD.setBounds(860, 10, 240, 45);
 		contentPane.add(lbl_chat_EOD);
 		
 		JLabel lbl_nickname = new JLabel("NICKNAME");
@@ -236,8 +262,32 @@ public class P2P_View extends JFrame {
 			}
 		});
 		btn_exit.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		btn_exit.setBounds(980, 680, 150, 30);
+		btn_exit.setBounds(10, 570, 150, 30);
 		contentPane.add(btn_exit);
+		
+		JLabel lbl_ID = new JLabel("ID:");
+		lbl_ID.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 15));
+		lbl_ID.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_ID.setBounds(200, 570, 60, 30);
+		contentPane.add(lbl_ID);
+		
+		JLabel lbl_IP = new JLabel("IP:");
+		lbl_IP.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_IP.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 15));
+		lbl_IP.setBounds(400, 570, 60, 30);
+		contentPane.add(lbl_IP);
+		
+		lbl_ID_to_show = new JLabel("");
+		lbl_ID_to_show.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_ID_to_show.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 15));
+		lbl_ID_to_show.setBounds(260, 570, 100, 30);
+		contentPane.add(lbl_ID_to_show);
+		
+		lbl_IP_to_show = new JLabel("");
+		lbl_IP_to_show.setHorizontalAlignment(SwingConstants.CENTER);
+		lbl_IP_to_show.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 15));
+		lbl_IP_to_show.setBounds(460, 570, 140, 30);
+		contentPane.add(lbl_IP_to_show);
 		
 		start_objects("224.0.0.4", 5000);
 		
@@ -245,16 +295,27 @@ public class P2P_View extends JFrame {
 	
 	
 	private void start_objects(String host, int port) {
+		int ID = -1;
+		String IP = "";
+		try {
+			ID = Integer.parseInt(InetAddress.getLocalHost().getHostAddress().substring(7).replace(".", ""));
+			IP = String.valueOf(InetAddress.getLocalHost().getHostAddress());
+			lbl_ID_to_show.setText(String.valueOf(ID));
+			lbl_IP_to_show.setText(IP);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		peer = new PeerMC(host, port, text_area_chat);	
 		new Thread(peer).start();
 		manager = new Manager_Files(host, port + 500, text_area_chat_files);
 		manager.start();
 		//new Thread(manager).start();
-		anillo = new Anillo(host, port + 1000, text_area_chat_algoritmo_anillo);
-		anillo.start();
-		new Thread (anillo).start();
-		bully = new Bully(host, port + 1500, text_area_chat_algoritmo_bully);
-		new Thread(bully).start();
+		//anillo = new Anillo(host, port + 1000, text_area_chat_algoritmo_anillo);
+		//anillo.start();
+		//new Thread (anillo).start();
+		bully = new Bully(host, port + 1500, text_area_chat_algoritmo_bully, ID, IP);
+		bully.start();
 	}
 	
 

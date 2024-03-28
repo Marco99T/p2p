@@ -25,7 +25,7 @@ public class PeerMC implements Runnable{
             this.socket.joinGroup(group);
         } 
         catch (Exception e) {
-        	 System.out.println(e.getMessage());
+        	e.printStackTrace();
         }
     }
 
@@ -41,7 +41,7 @@ public class PeerMC implements Runnable{
             this.packet = new DatagramPacket(data, data.length, group, port);
             this.socket.send(packet);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
     }
 
@@ -64,7 +64,7 @@ public class PeerMC implements Runnable{
             }
         }
         catch (Exception e) {
-        	System.out.println(e.getMessage());
+        	e.printStackTrace();
         }
     }
 }

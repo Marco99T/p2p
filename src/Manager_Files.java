@@ -58,7 +58,6 @@ public class Manager_Files 	extends Thread{
 	}
 	
 	//BUG OPENING THE FILE.
-	@SuppressWarnings("resource")
 	public void run () {
 		try {
             
