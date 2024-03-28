@@ -113,12 +113,12 @@ public class Bully extends Thread{
                                 break;
                             case "NoLeader":
                                 text_are_chat_algoritmo_bully.append("No hay coordinador. \n");
-                            	timer_to_be_coordinador.cancel();
-                            	break;
+                                timer_to_be_coordinador.cancel();
+                                break;
                             case "Status":
-                            	this.status = true;
+                            this.status = true;
                                 timer_to_convert_in_coordinador.cancel();
-                            	break;
+                                break;
                             default:
                                 break;
                         }

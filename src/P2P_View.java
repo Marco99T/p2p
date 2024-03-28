@@ -111,7 +111,7 @@ public class P2P_View extends JFrame {
 		JButton btn_anillo = new JButton("Anillo");
 		btn_anillo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				anillo.iniciarElección();
+				anillo.startElection();
 			}
 		});
 		btn_anillo.setBounds(0, 260, 240, 30);
@@ -310,10 +310,8 @@ public class P2P_View extends JFrame {
 		new Thread(peer).start();
 		manager = new Manager_Files(host, port + 500, text_area_chat_files);
 		manager.start();
-		//new Thread(manager).start();
-		//anillo = new Anillo(host, port + 1000, text_area_chat_algoritmo_anillo);
-		//anillo.start();
-		//new Thread (anillo).start();
+		anillo = new Anillo(host, port + 1000, text_area_chat_algoritmo_anillo, ID, IP);
+		anillo.start();
 		bully = new Bully(host, port + 1500, text_area_chat_algoritmo_bully, ID, IP);
 		bully.start();
 	}
