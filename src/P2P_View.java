@@ -15,13 +15,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Desktop;
 
 public class P2P_View extends JFrame {
@@ -102,7 +100,7 @@ public class P2P_View extends JFrame {
 		JButton btn_bully = new JButton("Bully");
 		btn_bully.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				bully.send_message();
+				bully.option_to_send_message(2);
 			}
 		});
 		btn_bully.setBounds(0, 0, 240, 30);
@@ -257,7 +255,7 @@ public class P2P_View extends JFrame {
 		JButton btn_exit = new JButton("Salir");
 		btn_exit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				bully.notify_disconeccted();
+				bully.option_to_send_message(4);
 				System.exit(0);
 			}
 		});
