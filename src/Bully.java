@@ -23,13 +23,7 @@ public class Bully extends Thread{
 	
 	private JTextArea text_are_chat_algoritmo_bully;
 	
-	public Bully
-    (
-        String host, int port
-        , JTextArea text_are_chat_algoritmo_bully, int ID, String IP
-    ) 
-    {
-
+	public Bully(String host, int port, JTextArea text_are_chat_algoritmo_bully, int ID, String IP) {
 		timer_to_be_coordinador = new Timer();
         timer_to_convert_in_coordinador = new Timer();
 		this.text_are_chat_algoritmo_bully = text_are_chat_algoritmo_bully;
@@ -57,37 +51,41 @@ public class Bully extends Thread{
                 String address = String.valueOf(pack_.getAddress().getHostAddress());
                 if(!address.equals(this.IP)){
                     
+                    String data_received = new String(pack_.getData(), 0, pack_.getLength());
+                    String[] parts_of_data_received = data_received.split(":");
+                    int id_from_nodo = Integer.parseInt(parts_of_data_received[1]);
+                    String case_messagge = parts_of_data_received[0];
                     //Validamos que es los que se esta recibiendo
-                    String data_from_packet = new String(pack_.getData());
-                    ArrayList <String> data = get_data_from_datagrampacket(data_from_packet);
-                    String message_cadidate = data.get(0);
-                    int id_candidate = Integer.parseInt(data.get(1));
-                    System.out.println(data_from_packet);
+                    //String data_from_packet = new String(pack_.getData());
+                    //ArrayList <String> data = get_data_from_datagrampacket(data_from_packet);
+                    //String message_cadidate = data.get(0);
+                    //int id_candidate = Integer.parseInt(data.get(1));
+                    System.out.println(data_received);
                     
                     if(this.coordinador){
                         message_from_coordinator();
                     }
                     else {
-                        switch(message_cadidate) {
+                        switch(case_messagge) {
                             case "Coordinador":
                             //With this i can knoew whos the coordidador
                                 if(!is_there_coordinador){
                                     this.elector_lock = false;
                                     this.is_there_coordinador = true;
-                                    String message = "El coordinador actual es: " + id_candidate + "\n";
+                                    String message = "El coordinador actual es: " + id_from_nodo + "\n";
                                     text_are_chat_algoritmo_bully.append(message);
                                     timer_to_be_coordinador.cancel();
                                 }
                                 break;
                             case "Eleccion":
-                                if(this.ID > id_candidate && !this.elector_lock){
+                                if(this.ID > id_from_nodo && !this.elector_lock){
                                     this.elector_lock=true;
                                     text_are_chat_algoritmo_bully.append("Soy candidato(" + this.ID +") \n");
                                     message_to_select();
                                     message_to_change_status_of_nodo(address);
                                     
                                     //White a response, if there is not a response, then this node its convert in leader
-                                    timer_to_convert_in_coordinador.scheduleAtFixedRate(new TimerTask() {
+                                    timer_to_convert_in_coordinador.schedule(new TimerTask() {
                                         public void run(){
                                             if(!status && !coordinador){
                                                 text_are_chat_algoritmo_bully.append("Soy ahora el coordinador: " + ID +".\n");
@@ -97,14 +95,14 @@ public class Bully extends Thread{
                                                 elector_lock = false;
                                             }
                                         }
-                                    }, 1500, 1000);
+                                    }, 1500);
                                 }
                                 break;
                             case "Desconectado":
                                 if(is_there_coordinador){
                                     this.is_there_coordinador = false;
                                     this.elector_lock = false;
-                                    String message_to_nodes = "El coordinador: " + id_candidate + " se ha desconectado. \n";
+                                    String message_to_nodes = "El coordinador: " + id_from_nodo + " se ha desconectado. \n";
                                     text_are_chat_algoritmo_bully.append(message_to_nodes);
                                 }
                                 break;
@@ -132,7 +130,8 @@ public class Bully extends Thread{
 	}
 
 	private void message_from_coordinator(){
-        byte buffer []= ("Coordinador " + this.ID + ".").getBytes();
+        byte [] buffer = ("Coordinador" + ":" + this.ID).getBytes();
+        //byte buffer []= ("Coordinador " + this.ID + ".").getBytes();
         DatagramPacket packet = new DatagramPacket
         (
             buffer, buffer.length, 
@@ -146,10 +145,11 @@ public class Bully extends Thread{
     }
 	
 	private void message_to_select(){
-        String message = "Eleccion " + this.ID + ".";
+        byte [] message = ("Eleccion" + ":" + this.ID).getBytes();
+        //String message = "Eleccion " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
-            message.getBytes(), message.getBytes().length, 
+            message, message.length, 
             this.group, this.port
             );
         try {
@@ -183,10 +183,11 @@ public class Bully extends Thread{
     }
 
     protected void verify_leader() {
-		String message = "Leader " + this.ID + ".";
+        byte [] message = ("Leader" + ":" + this.ID).getBytes();
+		//String message = "Leader " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
-            message.getBytes(), message.getBytes().length, 
+            message, message.length, 
             this.group, this.port
         );
         try {
@@ -220,7 +221,7 @@ public class Bully extends Thread{
                 text_are_chat_algoritmo_bully.append(message);
             }
             Timer convert_lider = new Timer();
-            convert_lider.scheduleAtFixedRate(new TimerTask() {
+            convert_lider.schedule(new TimerTask() {
                 public void run(){
                     if(!status && !coordinador && !is_there_coordinador){
                         text_are_chat_algoritmo_bully.append("Soy ahora el coordinador: " + ID +".\n");
@@ -230,14 +231,15 @@ public class Bully extends Thread{
                         elector_lock = false;
                     }
                 }
-            }, 1500, 1200);
+            }, 1500);
 	}
 
     public void notify_disconeccted(){
-        String message = "Desconectado " + this.ID + ".";
+        byte [] message = ("Desconectado" + ":" + this.ID).getBytes();
+        //String message = "Desconectado " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
-            message.getBytes(), message.getBytes().length, 
+            message, message.length, 
             this.group, this.port
         );
         try {
@@ -249,10 +251,11 @@ public class Bully extends Thread{
     }
     
     private void message_no_leader() {
-    	String message = "NoLeader " + this.ID + ".";
+        byte [] message = ("NoLeader" + ":" + this.ID).getBytes();
+    	//String message = "NoLeader " + this.ID + ".";
         DatagramPacket packet = new DatagramPacket
         (
-            message.getBytes(), message.getBytes().length, 
+            message, message.length, 
             this.group, this.port
         );
         try {
@@ -263,11 +266,12 @@ public class Bully extends Thread{
     }
     
     private void message_to_change_status_of_nodo(String address) {
-    	String message = "Status " + this.ID + ".";
+        byte [] message = ("Status" + ":" + this.ID).getBytes();
+    	//String message = "Status " + this.ID + ".";
         try {
         	DatagramPacket packet = new DatagramPacket
             (
-                message.getBytes(), message.getBytes().length, 
+                message, message.length, 
                 InetAddress.getByName(address), this.port
             );
             this.socket.send(packet);
