@@ -21,6 +21,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.Color;
 import java.awt.Desktop;
+import javax.swing.ImageIcon;
 
 public class Main extends JFrame {
 
@@ -34,6 +35,7 @@ public class Main extends JFrame {
     private JTextArea text_area_chat_files;
     private JLabel lbl_IP_to_show;
     private JLabel lbl_ID_to_show;
+    private JButton btn_send_message;
     
     
     private Chat peer;
@@ -68,7 +70,7 @@ public class Main extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1150, 650);
 		contentPane = new JPanel();
-		contentPane.setBackground(new Color(0, 255, 255));
+		contentPane.setBackground(new Color(39, 189, 240));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		setContentPane(contentPane);
@@ -82,15 +84,17 @@ public class Main extends JFrame {
 		
 		text_area_chat_algoritmo_bully = new JTextArea();
 		text_area_chat_algoritmo_bully.setEditable(false);
-		text_area_chat_algoritmo_bully.setFont(new Font("Monospaced", Font.ITALIC, 12));
+		text_area_chat_algoritmo_bully.setFont(new Font("Verdana", Font.PLAIN, 12));
+		text_area_chat_algoritmo_bully.setBackground(Color.decode("#EE7227"));
 		
 		JScrollPane scroll_chat_algoritmo_bully = new JScrollPane( text_area_chat_algoritmo_bully);
 		scroll_chat_algoritmo_bully.setBounds(0, 30, 240, 210);
 		panel_algoritmos_eleccion.add(scroll_chat_algoritmo_bully);
 		
 		text_area_chat_algoritmo_anillo = new JTextArea();
-		text_area_chat_algoritmo_anillo.setFont(new Font("Monospaced", Font.ITALIC, 12));
+		text_area_chat_algoritmo_anillo.setFont(new Font("Verdana", Font.PLAIN, 12));
 		text_area_chat_algoritmo_anillo.setEditable(false);
+		text_area_chat_algoritmo_anillo.setBackground(Color.decode("#EE7227"));
 		
 		JScrollPane scroll_chat_algoritmo_anillo = new JScrollPane(text_area_chat_algoritmo_anillo);
 		scroll_chat_algoritmo_anillo.setBounds(0, 290, 240, 210);
@@ -98,6 +102,7 @@ public class Main extends JFrame {
 		
 		
 		JButton btn_bully = new JButton("Bully");
+		btn_bully.setFont(new Font("Segoe UI", Font.BOLD, 12));
 		btn_bully.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				bully.option_to_send_message(2);
@@ -107,6 +112,7 @@ public class Main extends JFrame {
 		panel_algoritmos_eleccion.add(btn_bully);
 		
 		JButton btn_anillo = new JButton("Anillo");
+		btn_anillo.setFont(new Font("Segoe UI", Font.BOLD, 12));
 		btn_anillo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				anillo.iniciarElección();
@@ -116,7 +122,7 @@ public class Main extends JFrame {
 		panel_algoritmos_eleccion.add(btn_anillo);
 		
 		JPanel panel_algoritmos_consencio = new JPanel();
-		panel_algoritmos_consencio.setBackground(Color.LIGHT_GRAY);
+		panel_algoritmos_consencio.setBackground(Color.decode("#AF27EE"));
 		panel_algoritmos_consencio.setBounds(280, 60, 240, 500);
 		contentPane.add(panel_algoritmos_consencio);
 		
@@ -127,14 +133,15 @@ public class Main extends JFrame {
 		
 		text_area_chat = new JTextArea();
 		text_area_chat.setEditable(false);
-		text_area_chat.setFont(new Font("Monospaced", Font.ITALIC, 12));
+		text_area_chat.setFont(new Font("Verdana", Font.PLAIN, 12));
+		text_area_chat.setBackground(Color.decode("#25EDF3"));
 		
 		JScrollPane scroll_chat = new JScrollPane(text_area_chat);
 		scroll_chat.setBounds(0, 0, 280, 440);
 		panel_chat.add(scroll_chat);
 		
 		JPanel panel_send_message = new JPanel();
-		panel_send_message.setBounds(0, 470, 280, 30);
+		panel_send_message.setBounds(0, 470, 230, 30);
 		panel_chat.add(panel_send_message);
 		panel_send_message.setLayout(new BorderLayout(0, 0));
 		
@@ -147,13 +154,21 @@ public class Main extends JFrame {
 		text_send_message.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		panel_send_message.add(text_send_message, BorderLayout.CENTER);
 		
-		JButton btn_send_message = new JButton("Enviar");
+		btn_send_message = new JButton("Enviar");
+		btn_send_message.setBounds(230, 470, 50, 30);
+		btn_send_message.setFont(new Font("Segoe UI", Font.BOLD, 12));
 		btn_send_message.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				send_message();
 			}
 		});
-		panel_send_message.add(btn_send_message, BorderLayout.EAST);
+		ImageIcon icon_send = new ImageIcon(Main.class.getResource("resources/enviar.png"));
+		int width = btn_send_message.getWidth();
+        int height = btn_send_message.getHeight();
+        ImageIcon scaledIcon = new ImageIcon(icon_send.getImage().getScaledInstance(width, height, java.awt.Image.SCALE_AREA_AVERAGING));
+        btn_send_message.setIcon(scaledIcon);
+        panel_chat.add(btn_send_message);
+		//panel_send_message.add(btn_send_message, BorderLayout.EAST);
 		
 		JPanel panel_EOD = new JPanel();
 		panel_EOD.setBackground(Color.LIGHT_GRAY);
@@ -162,6 +177,7 @@ public class Main extends JFrame {
 		panel_EOD.setLayout(null);
 		
 		JButton btn_upload_file = new JButton("Subir");
+		btn_upload_file.setFont(new Font("Segoe UI", Font.BOLD, 12));
 		btn_upload_file.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
@@ -181,9 +197,15 @@ public class Main extends JFrame {
 			}
 		});
 		btn_upload_file.setBounds(0, 470, 120, 30);
+		ImageIcon icon_upload = new ImageIcon(Main.class.getResource("resources/subir.png"));
+		int width_upload = 40;//btn_upload_file.getWidth();
+        int height_upload = 40;//btn_upload_file.getHeight();
+        ImageIcon scaled_icon_upload = new ImageIcon(icon_upload.getImage().getScaledInstance(width_upload, height_upload, java.awt.Image.SCALE_SMOOTH));
+        btn_upload_file.setIcon(scaled_icon_upload);
 		panel_EOD.add(btn_upload_file);
 		
-		JButton btn_show_files = new JButton("Ver Archivos");
+		JButton btn_show_files = new JButton("Ver");
+		btn_show_files.setFont(new Font("Segoe UI", Font.BOLD, 12));
 		btn_show_files.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String ruta = "/files_recived";
@@ -205,10 +227,16 @@ public class Main extends JFrame {
 			}
 		});
 		btn_show_files.setBounds(120, 470, 120, 30);
+		ImageIcon icon_show_files = new ImageIcon(Main.class.getResource("resources/directorio.png"));
+		int width_show_files = 40;//btn_show_files.getWidth();
+        int height_show_files = 40;//btn_show_files.getHeight();
+        ImageIcon scaled_icon_show_files = new ImageIcon(icon_show_files.getImage().getScaledInstance(width_show_files, height_show_files, java.awt.Image.SCALE_SMOOTH));
+        btn_show_files.setIcon(scaled_icon_show_files);
 		panel_EOD.add(btn_show_files);
 		
 		text_area_chat_files = new JTextArea();
-		text_area_chat_files.setBackground(new Color(106, 90, 205));
+		text_area_chat_files.setFont(new Font("Verdana", Font.PLAIN, 12));
+		text_area_chat_files.setBackground(Color.decode("#E0B0FF"));
 		text_area_chat_files.setEditable(false);
 		
 		JScrollPane scroll_chat_files = new JScrollPane(text_area_chat_files);
@@ -217,26 +245,26 @@ public class Main extends JFrame {
 		
 		
 		JLabel lbl_algoritmos_1 = new JLabel("Algoritmos de eleccion");
-		lbl_algoritmos_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_algoritmos_1.setFont(new Font("Verdana", Font.ITALIC, 14));
 		lbl_algoritmos_1.setHorizontalAlignment(SwingConstants.CENTER);
 		lbl_algoritmos_1.setBounds(10, 10, 240, 45);
 		contentPane.add(lbl_algoritmos_1);
 		
 		JLabel lbl_algoritmos_2 = new JLabel("Algortimos de consorcio");
 		lbl_algoritmos_2.setHorizontalAlignment(SwingConstants.CENTER);
-		lbl_algoritmos_2.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_algoritmos_2.setFont(new Font("Verdana", Font.ITALIC, 14));
 		lbl_algoritmos_2.setBounds(280, 10, 240, 45);
 		contentPane.add(lbl_algoritmos_2);
 		
 		JLabel lbl_chat = new JLabel("Chat");
 		lbl_chat.setHorizontalAlignment(SwingConstants.CENTER);
-		lbl_chat.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_chat.setFont(new Font("Verdana", Font.ITALIC, 14));
 		lbl_chat.setBounds(550, 10, 280, 45);
 		contentPane.add(lbl_chat);
 		
 		JLabel lbl_chat_EOD = new JLabel("Espacio de objetos distribuido");
 		lbl_chat_EOD.setHorizontalAlignment(SwingConstants.CENTER);
-		lbl_chat_EOD.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lbl_chat_EOD.setFont(new Font("Verdana", Font.ITALIC, 14));
 		lbl_chat_EOD.setBounds(860, 10, 240, 45);
 		contentPane.add(lbl_chat_EOD);
 		
@@ -247,7 +275,7 @@ public class Main extends JFrame {
 		panel_chat.add(lbl_nickname);
 		
 		text_nickname = new JTextField();
-		text_nickname.setFont(new Font("Arial", Font.ITALIC, 12));
+		text_nickname.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 12));
 		text_nickname.setBounds(110, 440, 170, 30);
 		panel_chat.add(text_nickname);
 		text_nickname.setColumns(10);
@@ -259,7 +287,7 @@ public class Main extends JFrame {
 				System.exit(0);
 			}
 		});
-		btn_exit.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		btn_exit.setFont(new Font("Segoe UI", Font.BOLD | Font.ITALIC, 14));
 		btn_exit.setBounds(10, 570, 150, 30);
 		contentPane.add(btn_exit);
 		
@@ -304,8 +332,8 @@ public class Main extends JFrame {
 			e.printStackTrace();
 		}
 		
-		peer = new Chat(host, port, text_area_chat);	
-		new Thread(peer).start();
+		peer = new Chat(host, port, text_area_chat, IP);	
+		peer.start();
 		manager = new Manager_Files(host, port + 500, text_area_chat_files);
 		manager.start();
 		//new Thread(manager).start();
@@ -331,6 +359,7 @@ public class Main extends JFrame {
 				|| extention_file.equals("mp3")
 				|| extention_file.equals("jpg")
 				|| extention_file.equals("png")
+				|| extention_file.equals("mp4")
 				|| extention_file.equals("txt"))	return true;
 		
 		return false;
