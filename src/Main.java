@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 import java.awt.Color;
 import java.awt.Desktop;
 
-public class P2P_View extends JFrame {
+public class Main extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -36,7 +36,7 @@ public class P2P_View extends JFrame {
     private JLabel lbl_ID_to_show;
     
     
-    private PeerMC peer;
+    private Chat peer;
     private Person person;
     private Manager_Files manager;
     private Bully bully;
@@ -50,7 +50,7 @@ public class P2P_View extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					P2P_View frame = new P2P_View();
+					Main frame = new Main();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -62,7 +62,7 @@ public class P2P_View extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public P2P_View() {
+	public Main() {
 		setAutoRequestFocus(false);
 		setTitle("P2P");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -304,7 +304,7 @@ public class P2P_View extends JFrame {
 			e.printStackTrace();
 		}
 		
-		peer = new PeerMC(host, port, text_area_chat);	
+		peer = new Chat(host, port, text_area_chat);	
 		new Thread(peer).start();
 		manager = new Manager_Files(host, port + 500, text_area_chat_files);
 		manager.start();
