@@ -115,7 +115,7 @@ public class Main extends JFrame {
 		btn_anillo.setFont(new Font("Segoe UI", Font.BOLD, 12));
 		btn_anillo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				anillo.iniciarElección();
+				anillo.options_of_messagess_to_send(2);
 			}
 		});
 		btn_anillo.setBounds(0, 260, 240, 30);
@@ -336,10 +336,8 @@ public class Main extends JFrame {
 		peer.start();
 		manager = new Manager_Files(host, port + 500, text_area_chat_files);
 		manager.start();
-		//new Thread(manager).start();
-		//anillo = new Anillo(host, port + 1000, text_area_chat_algoritmo_anillo);
-		//anillo.start();
-		//new Thread (anillo).start();
+		anillo = new Anillo(host, port + 1000, text_area_chat_algoritmo_anillo, ID, IP);
+		anillo.start();
 		bully = new Bully(host, port + 1500, text_area_chat_algoritmo_bully, ID, IP);
 		bully.start();
 	}
