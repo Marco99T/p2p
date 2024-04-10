@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import javax.swing.JTextArea;
 
-public class PeerMC implements Runnable{
+public class Chat implements Runnable{
 	
     private MulticastSocket socket;
     private InetAddress group;
@@ -15,7 +15,7 @@ public class PeerMC implements Runnable{
     private int port;
     private JTextArea text_area_chat;
     
-    public PeerMC(String host, int port, JTextArea text_area_chat){
+    public Chat(String host, int port, JTextArea text_area_chat){
     	
     	this.text_area_chat = text_area_chat;
         try {
