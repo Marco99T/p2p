@@ -16,6 +16,7 @@ public class Chat extends Thread{
     private String IP;
     private JTextArea text_area_chat;
     
+    @SuppressWarnings("deprecation")
     public Chat(String host, int port, JTextArea text_area_chat, String IP){
     	
     	this.text_area_chat = text_area_chat;

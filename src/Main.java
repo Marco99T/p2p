@@ -22,8 +22,6 @@ import javax.swing.JTextField;
 import java.awt.Color;
 import java.awt.Desktop;
 import javax.swing.ImageIcon;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 public class Main extends JFrame {
 
