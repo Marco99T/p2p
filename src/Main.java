@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 import java.awt.Color;
 import java.awt.Desktop;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 
 public class Main extends JFrame {
 
@@ -36,7 +37,13 @@ public class Main extends JFrame {
     private JLabel lbl_IP_to_show;
     private JLabel lbl_ID_to_show;
     private JButton btn_send_message;
+    private JCheckBox check_box_bully;
+    private JCheckBox check_box_anillo;
     
+    private int ID = -1;
+	private String IP = "";
+	private final String HOST = "224.0.0.4";
+	private int PORT = 5000;
     
     private Chat peer;
     private Person person;
@@ -78,7 +85,7 @@ public class Main extends JFrame {
 		
 		JPanel panel_algoritmos_eleccion = new JPanel();
 		panel_algoritmos_eleccion.setBackground(Color.LIGHT_GRAY);
-		panel_algoritmos_eleccion.setBounds(10, 60, 240, 500);
+		panel_algoritmos_eleccion.setBounds(10, 80, 240, 480);
 		contentPane.add(panel_algoritmos_eleccion);
 		panel_algoritmos_eleccion.setLayout(null);
 		
@@ -97,7 +104,7 @@ public class Main extends JFrame {
 		text_area_chat_algoritmo_anillo.setBackground(Color.decode("#EE7227"));
 		
 		JScrollPane scroll_chat_algoritmo_anillo = new JScrollPane(text_area_chat_algoritmo_anillo);
-		scroll_chat_algoritmo_anillo.setBounds(0, 290, 240, 210);
+		scroll_chat_algoritmo_anillo.setBounds(0, 270, 240, 210);
 		panel_algoritmos_eleccion.add(scroll_chat_algoritmo_anillo);
 		
 		
@@ -106,6 +113,7 @@ public class Main extends JFrame {
 		btn_bully.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				bully.option_to_send_message(2);
+				anillo.options_of_messagess_to_send(6);
 			}
 		});
 		btn_bully.setBounds(0, 0, 240, 30);
@@ -118,7 +126,7 @@ public class Main extends JFrame {
 				anillo.options_of_messagess_to_send(2);
 			}
 		});
-		btn_anillo.setBounds(0, 260, 240, 30);
+		btn_anillo.setBounds(0, 240, 240, 30);
 		panel_algoritmos_eleccion.add(btn_anillo);
 		
 		JPanel panel_algoritmos_consencio = new JPanel();
@@ -315,14 +323,56 @@ public class Main extends JFrame {
 		lbl_IP_to_show.setBounds(460, 570, 140, 30);
 		contentPane.add(lbl_IP_to_show);
 		
-		start_objects("224.0.0.4", 5000);
+		check_box_bully = new JCheckBox("Bully");
+		check_box_bully.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(check_box_bully.isSelected()) {
+					check_box_anillo.setEnabled(false);
+					btn_bully.setEnabled(true);
+					scroll_chat_algoritmo_bully.setEnabled(true);
+					bully = new Bully(HOST, PORT + 1500, text_area_chat_algoritmo_bully, ID, IP);
+					bully.start();
+				}
+				else {
+					check_box_anillo.setEnabled(true);
+					btn_bully.setEnabled(false);
+					scroll_chat_algoritmo_bully.setEnabled(false);
+					text_area_chat_algoritmo_bully.setText("");
+				}
+			}
+		});
+		check_box_bully.setHorizontalAlignment(SwingConstants.CENTER);
+		check_box_bully.setBounds(10, 50, 90, 20);
+		contentPane.add(check_box_bully);
+		
+		check_box_anillo = new JCheckBox("Anillo");
+		check_box_anillo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(check_box_anillo.isSelected()) {
+					check_box_bully.setEnabled(false);
+					btn_anillo.setEnabled(true);
+					scroll_chat_algoritmo_anillo.setEnabled(true);
+					anillo = new Anillo(HOST, PORT + 1000, text_area_chat_algoritmo_anillo, ID, IP);
+					anillo.start();
+				}
+				else {
+					check_box_bully.setEnabled(true);
+					btn_anillo.setEnabled(false);
+					scroll_chat_algoritmo_anillo.setEnabled(false);
+					text_area_chat_algoritmo_anillo.setText("");
+				}
+			}
+		});
+		check_box_anillo.setHorizontalAlignment(SwingConstants.CENTER);
+		check_box_anillo.setBounds(160, 50, 90, 20);
+		contentPane.add(check_box_anillo);
+		
+		start_objects();
 		
 	}
 	
 	
-	private void start_objects(String host, int port) {
-		int ID = -1;
-		String IP = "";
+	private void start_objects() {
 		try {
 			ID = Integer.parseInt(InetAddress.getLocalHost().getHostAddress().substring(7).replace(".", ""));
 			IP = String.valueOf(InetAddress.getLocalHost().getHostAddress());
@@ -332,14 +382,10 @@ public class Main extends JFrame {
 			e.printStackTrace();
 		}
 		
-		peer = new Chat(host, port, text_area_chat, IP);	
+		peer = new Chat(HOST, PORT, text_area_chat, IP);	
 		peer.start();
-		manager = new Manager_Files(host, port + 500, text_area_chat_files);
+		manager = new Manager_Files(HOST, PORT + 500, text_area_chat_files);
 		manager.start();
-		anillo = new Anillo(host, port + 1000, text_area_chat_algoritmo_anillo, ID, IP);
-		anillo.start();
-		bully = new Bully(host, port + 1500, text_area_chat_algoritmo_bully, ID, IP);
-		bully.start();
 	}
 	
 
