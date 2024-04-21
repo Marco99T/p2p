@@ -91,5 +91,7 @@ public class Block {
     public String getPreviousHash(){
         return previousHash;
     }
-
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
 }
