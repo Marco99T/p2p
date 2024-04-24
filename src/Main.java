@@ -29,6 +29,7 @@ public class Main extends JFrame {
 	private JPanel contentPane;
     private JTextField text_send_message;
     private JTextArea text_area_chat;
+	private JTextArea text_area_pow;
     private JTextArea text_area_chat_algoritmo_bully;
     private JTextArea text_area_chat_algoritmo_anillo;
     private JTextField text_nickname;
@@ -43,6 +44,7 @@ public class Main extends JFrame {
     private Manager_Files manager;
     private Bully bully;
     private Anillo anillo;
+	private PowThread pow;
     
 
 	/**
@@ -124,7 +126,17 @@ public class Main extends JFrame {
 		JPanel panel_algoritmos_consencio = new JPanel();
 		panel_algoritmos_consencio.setBackground(Color.decode("#AF27EE"));
 		panel_algoritmos_consencio.setBounds(280, 60, 240, 500);
+		panel_algoritmos_consencio.setLayout(null);
 		contentPane.add(panel_algoritmos_consencio);
+
+		text_area_pow = new JTextArea();
+		text_area_pow.setEditable(false);
+		text_area_pow.setFont(new Font("Verdana", Font.PLAIN, 12));
+		text_area_pow.setBackground(Color.decode("#25EDF3"));
+		
+		JScrollPane scroll_pow = new JScrollPane(text_area_pow);
+		scroll_pow.setBounds(0, 0, 280, 440);
+		panel_algoritmos_consencio.add(scroll_pow);
 		
 		JPanel panel_chat = new JPanel();
 		panel_chat.setBounds(550, 60, 280, 500);
@@ -314,6 +326,15 @@ public class Main extends JFrame {
 		lbl_IP_to_show.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 15));
 		lbl_IP_to_show.setBounds(460, 570, 140, 30);
 		contentPane.add(lbl_IP_to_show);
+
+		JButton powthread = new JButton("Block");
+		powthread.setBounds(600, 570, 140, 30);
+		powthread.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pow.newCadenadeBloquesEnviar();
+			}
+		});
+		contentPane.add(powthread);
 		
 		start_objects("224.0.0.4", 5000);
 		
@@ -340,6 +361,8 @@ public class Main extends JFrame {
 		anillo.start();
 		bully = new Bully(host, port + 1500, text_area_chat_algoritmo_bully, ID, IP);
 		bully.start();
+		pow = new PowThread(host , port, text_area_pow);
+		pow.start();
 	}
 	
 

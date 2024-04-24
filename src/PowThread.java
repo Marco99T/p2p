@@ -38,12 +38,12 @@ public class PowThread extends Thread {
                 // Procesar el objeto recibido según su tipo
                 if (receivedObject instanceof List<?>) {
                     // Si el objeto es una lista de bloques, procesarla
-                    text_area_pow.append("Cadena de bloques recibida ");
+                    text_area_pow.append("Cadena de bloques recibida \n");
                     List<Block> receivedChain = (List<Block>) receivedObject;
-                    text_area_pow.append("Iniciando validacion");
+                    text_area_pow.append("Iniciando validacion \n");
                     handleReceivedChain(receivedChain);
                 } else {
-                    text_area_pow.append("Cadena invalida o no es una cadena");
+                    text_area_pow.append("Cadena invalida o no es una cadena\n");
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -58,13 +58,14 @@ public class PowThread extends Thread {
             Block previousBlocka = chain.get(i - 1);
 
             if (!currentBlock.isValidBlock(currentBlock, previousBlocka, 3)) {
+                text_area_pow.append("El bloque " + currentBlock.getIndex() + " no es válido.\n");
                 System.out.println("El bloque " + currentBlock.getIndex() + " no es válido.");
-                text_area_pow.append("Validacion fallida el bloque " + currentBlock.getIndex() + "no es valido");
+                text_area_pow.append("Validacion fallida el bloque " + currentBlock.getIndex() + "no es valido\n");
                 return false;
             }
         }
         System.out.println("Todos los bloques son válidos.");
-        text_area_pow.append("Todos los bloques son validos");
+        text_area_pow.append("Todos los bloques son validos\n");
         blockchainL=chain;
         return true;
     }
@@ -84,11 +85,14 @@ public class PowThread extends Thread {
 
         // Minar el bloque génesis
         genesisBlock.mineBlock();
+        text_area_pow.append("se mino el bloque genesis\n");
         System.out.println("se mino el bloque genesis");
 
         // Agregar el bloque génesis a la cadena de bloques
         genesisBlock.handleRecivedBlock(genesisBlock);
+        text_area_pow.append("genesis se agrego a la cadena\n");
         System.out.println("genesis se agrego a la cadena");
+        text_area_pow.append("empieza a minar\n");
         System.out.println("empieza a minar");
 
         // Crear y minar los siguientes dos bloques
@@ -105,12 +109,13 @@ public class PowThread extends Thread {
             Block previousBlocka = Block.getBlockchain().get(i - 1);
 
             if (!currentBlock.isValidBlock(currentBlock, previousBlocka, 3)) {
+                text_area_pow.append("El bloque " + currentBlock.getIndex() + " no es válido.\n");
                 System.out.println("El bloque " + currentBlock.getIndex() + " no es válido.");
                 return;
             }
         }
         System.out.println("Todos los bloques son válidos.");
-        text_area_pow.append("Se genero una cadena de bloques y se enviara");
+        text_area_pow.append("Se genero una cadena de bloques y se enviara\n");
         sendChain(Block.getBlockchain());
     }
     public void sendChain(List<Block> chain) {
