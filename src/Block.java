@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +12,7 @@ public class Block {
     private List<Transaction> transactions;
     private int nonce;
     private int dificultad;
+    private static List<Block> blockchain = new ArrayList<>();
 
     //generacion del bloque
     public Block(int index, long timestamp, String previousHash, List<Transaction> transactions, int dificultad) {
@@ -58,29 +60,49 @@ public class Block {
     }
     //validacion del bloque
     public boolean isValidBlock(Block block, Block previousBlock, int difficulty){
+        String target = new String(new char[difficulty]).replace('\0', '0');
+        String hash = block.calculateHash();
+
+        System.out.println("Hash calculado: " + hash);
+        System.out.println("Objetivo: " + target);
         for (Transaction transaction : block.getTransactions()) {
             if (!transaction.isValid()) {
+                System.out.println("bloque invalido1");
                 return false;
             }
         }
 
         // Verificar integridad del bloque anterior
         if (!block.getPreviousHash().equals(previousBlock.getHash())) {
+            System.out.println("bloque invalido2");
             return false;
         }
 
         // Verificar prueba de trabajo (PoW)
-        String target = new String(new char[difficulty]).replace('\0', '0');
-        String hash = block.calculateHash();
         if (!hash.substring(0, difficulty).equals(target)) {
+            System.out.println("bloque invalido3");
             return false;
         }
 
         // Si todas las condiciones se cumplen, el bloque es válido
+        System.out.println("bloque valido");
         return true;
     }
     //Consenso y propagacion de bloques
     public void handleRecivedBlock(Block block){
+        if(getLatestBlock()==null){
+            blockchain.add(block);
+            System.out.println("Block genesis añadido a la blockchain: " + block.getHash());
+        }else{
+            if (isValidBlock(block, getLatestBlock(), dificultad)) {
+                // El bloque es válido, así que lo agregamos a la cadena de bloques
+                blockchain.add(block);
+                System.out.println("Block added to the blockchain: " + block.getHash());
+            } else {
+                // El bloque recibido no es válido, así que lo descartamos
+                System.out.println("Received block is not valid: " + block.getHash());
+            }
+        }
 
     }
 
@@ -93,5 +115,18 @@ public class Block {
     }
     public List<Transaction> getTransactions() {
         return transactions;
+    }
+    public static Block getLatestBlock() {
+        if (blockchain.isEmpty()) {
+            // Si la cadena de bloques está vacía, devuelve null o lanza una excepción, según lo desees
+            return null; // O lanza una excepción adecuada, como IllegalStateException
+        }
+        return blockchain.get(blockchain.size() - 1);
+    }
+    public int getIndex() {
+        return index;
+    }
+    public static List<Block> getBlockchain() {
+        return blockchain;
     }
 }

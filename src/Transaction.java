@@ -39,7 +39,7 @@ public class Transaction {
 
     // Método para calcular el hash de la transacción
     private String calculateHash() {
-        String data = sender + recipient + amount + timestamp.toString();
+        String data = sender + recipient + amount + timestamp.getTime(); // Utilizar solo el timestamp en milisegundos
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(data.getBytes());
@@ -73,7 +73,7 @@ public class Transaction {
             return false; // El hash de la transacción no coincide
         }
 
-        return true; // En este ejemplo, siempre se considera válida
+        return true;
     }
 
     // Método toString para representar la transacción como una cadena
