@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
-public class Transaction {
+public class Transaction implements Serializable{
     private String sender;
     private String recipient;
     private double amount;

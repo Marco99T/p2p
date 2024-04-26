@@ -1,10 +1,11 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-public class Block {
+public class Block implements Serializable{
     private int index;
     private long timestamp;
     private String previousHash;

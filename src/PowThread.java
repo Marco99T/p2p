@@ -9,6 +9,7 @@ public class PowThread extends Thread {
     private MulticastSocket socket;
     private InetAddress group;
     private int port;
+    private String IP;
 
     private JTextArea text_area_pow;
 
@@ -20,6 +21,7 @@ public class PowThread extends Thread {
             this.socket = new MulticastSocket(port);
             this.group = InetAddress.getByName(host);
             this.socket.joinGroup(group);
+            this.IP = String.valueOf(InetAddress.getLocalHost().getHostAddress());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,20 +32,23 @@ public class PowThread extends Thread {
             while (true) {
                 DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
                 socket.receive(receivePacket);
+                String address = String.valueOf(receivePacket.getAddress().getHostAddress());
+				if(!address.equals(this.IP)){
 
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(receivePacket.getData());
-                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-                Object receivedObject = objectInputStream.readObject();
+                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(receivePacket.getData());
+                    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+                    Object receivedObject = objectInputStream.readObject();
 
-                // Procesar el objeto recibido según su tipo
-                if (receivedObject instanceof List<?>) {
-                    // Si el objeto es una lista de bloques, procesarla
-                    text_area_pow.append("Cadena de bloques recibida \n");
-                    List<Block> receivedChain = (List<Block>) receivedObject;
-                    text_area_pow.append("Iniciando validacion \n");
-                    handleReceivedChain(receivedChain);
-                } else {
-                    text_area_pow.append("Cadena invalida o no es una cadena\n");
+                    // Procesar el objeto recibido según su tipo
+                    if (receivedObject instanceof List<?>) {
+                        // Si el objeto es una lista de bloques, procesarla
+                        text_area_pow.append("Cadena de bloques recibida \n");
+                        List<Block> receivedChain = (List<Block>) receivedObject;
+                        text_area_pow.append("Iniciando validacion \n");
+                        handleReceivedChain(receivedChain);
+                    } else {
+                        text_area_pow.append("Cadena invalida o no es una cadena\n");
+                    }
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -128,6 +133,7 @@ public class PowThread extends Thread {
             socket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -126,8 +126,8 @@ public class Main extends JFrame {
 		JPanel panel_algoritmos_consencio = new JPanel();
 		panel_algoritmos_consencio.setBackground(Color.decode("#AF27EE"));
 		panel_algoritmos_consencio.setBounds(280, 60, 240, 500);
-		panel_algoritmos_consencio.setLayout(null);
 		contentPane.add(panel_algoritmos_consencio);
+		panel_algoritmos_consencio.setLayout(null);
 
 		text_area_pow = new JTextArea();
 		text_area_pow.setEditable(false);
@@ -135,7 +135,7 @@ public class Main extends JFrame {
 		text_area_pow.setBackground(Color.decode("#25EDF3"));
 		
 		JScrollPane scroll_pow = new JScrollPane(text_area_pow);
-		scroll_pow.setBounds(0, 0, 280, 440);
+		scroll_pow.setBounds(0, 0, 240, 500);
 		panel_algoritmos_consencio.add(scroll_pow);
 		
 		JPanel panel_chat = new JPanel();
