@@ -89,21 +89,23 @@ public class PowThread extends Thread {
         Block previousBlock = genesisBlock;
 
         // Minar el bloque génesis
-        genesisBlock.mineBlock();
+        String block_minado = genesisBlock.mineBlock();
+        text_area_pow.append("Block mmined: " + block_minado + "\n");
         text_area_pow.append("se mino el bloque genesis\n");
         System.out.println("se mino el bloque genesis");
 
         // Agregar el bloque génesis a la cadena de bloques
         genesisBlock.handleRecivedBlock(genesisBlock);
-        text_area_pow.append("genesis se agrego a la cadena\n");
+        text_area_pow.append("gGenesis se agrego a la cadena\n");
         System.out.println("genesis se agrego a la cadena");
-        text_area_pow.append("empieza a minar\n");
+        text_area_pow.append("Empieza a minar\n");
         System.out.println("empieza a minar");
 
         // Crear y minar los siguientes dos bloques
         for (int i = 1; i <= 2; i++) {
             Block block = new Block(i, System.currentTimeMillis(), previousBlock.getHash(), transactions, 3);
-            block.mineBlock();
+            String blo = block.mineBlock();
+            text_area_pow.append("Block mine: " + blo + "\n");
             block.handleRecivedBlock(block);
             previousBlock = block;
         }
@@ -120,7 +122,7 @@ public class PowThread extends Thread {
             }
         }
         System.out.println("Todos los bloques son válidos.");
-        text_area_pow.append("Se genero una cadena de bloques y se enviara\n");
+        text_area_pow.append("Se genero una cadena de bloques y se enviara. \n");
         sendChain(Block.getBlockchain());
     }
     public void sendChain(List<Block> chain) {

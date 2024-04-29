@@ -51,13 +51,14 @@ public class Block implements Serializable{
         return builder.toString();
     }
     //resolucion de la prueba de trabajo
-    public void mineBlock(){
+    public String mineBlock(){
         String target = new String(new char[dificultad]).replace('\0', '0');
         while (!hash.substring(0, dificultad).equals(target)) {
             nonce++;
             hash = calculateHash();
         }
         System.out.println("Block mined: " + hash);
+        return hash;
     }
     //validacion del bloque
     public boolean isValidBlock(Block block, Block previousBlock, int difficulty){
