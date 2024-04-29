@@ -11,7 +11,6 @@ public class Chat extends Thread{
 	
     private MulticastSocket socket;
     private InetAddress group;
-    private DatagramPacket packet;
     private int port;
     private String IP;
     private JTextArea text_area_chat;
@@ -41,7 +40,7 @@ public class Chat extends Thread{
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
 			objectOutputStream.writeObject(person);
             byte[] data = byteArrayOutputStream.toByteArray();
-            this.packet = new DatagramPacket(data, data.length, group, port);
+            DatagramPacket packet = new DatagramPacket(data, data.length, group, port);
             this.socket.send(packet);
             this.text_area_chat.append(person.getNickname() + ": " + person.getMessage() + "\n");
 		} catch (Exception e) {
@@ -57,6 +56,7 @@ public class Chat extends Thread{
                 DatagramPacket packet = new DatagramPacket(new byte[1024] , 1024);
                 this.socket.receive(packet);
                 String address = String.valueOf(packet.getAddress().getHostAddress());
+                System.out.println(address);
 				if(!address.equals(this.IP)){
                     // Convertir los bytes recibidos de nuevo en un objeto Serializable
                     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(packet.getData());

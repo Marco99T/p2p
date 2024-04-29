@@ -361,7 +361,7 @@ public class Main extends JFrame {
 		anillo.start();
 		bully = new Bully(host, port + 1500, text_area_chat_algoritmo_bully, ID, IP);
 		bully.start();
-		pow = new PowThread(host , port, text_area_pow);
+		pow = new PowThread(host , port + 2000, text_area_pow);
 		pow.start();
 	}
 	
